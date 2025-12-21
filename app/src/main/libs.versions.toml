@@ -1,9 +1,0 @@
-toml
-[versions]
-# ... keep your existing versions
-ksp = "2.0.21-1.0.28"
-
-[plugins]
-# ... keep your existing plugins
-# Add this line:
-kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
