@@ -24,10 +24,22 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun RoomScreen(
-    currentHealth: Int = 5,
+    currentHealth: Int = 10,
+    coinCount: Int = 100,
     onTableClick: () -> Unit,
     onDoorClick: () -> Unit,
     onBowlClick: () -> Unit,
@@ -105,7 +117,7 @@ fun RoomScreen(
 
         // --- LAYER 3: THE KITTY 🐱 ---
 
-        val isHappy = currentHealth > 2
+        val isHappy = currentHealth > 4
         val catImage = if (isHappy) R.drawable.cat_sleep else R.drawable.cat_hungry
 
         // 1. CONFIGURE SIZES SEPARATELY 📏
@@ -140,6 +152,10 @@ fun RoomScreen(
                 // Use the dynamic variables we created above
                 .size(width = currentWidth, height = currentHeight)
                 .gameClick(interactionSource = catSource) { onCatClick() }
+        )
+        GameOverlay(
+            health = currentHealth,
+            coinCount = coinCount
         )
     }
 }
@@ -181,16 +197,76 @@ fun getPressColorFilter(isPressed: Boolean = false): ColorFilter? {
     ))
     return ColorFilter.colorMatrix(matrix)
 }
+// In RoomScreen.kt
 
+@Composable
+fun GameOverlay(
+    health: Int,      // Scale: 0 to 10 (10 = 5 Hearts, 9 = 4.5 Hearts)
+    coinCount: Int
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .systemBarsPadding(), // Keeps it safe from status bars
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        // --- HEART SECTION ---
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // We draw 5 hearts total
+            for (i in 1..5) {
+                // Math to decide which image to show:
+                // Full Heart Value: i * 2 (e.g., Heart 1 needs 2 health to be full)
+                // Half Heart Value: (i * 2) - 1
+
+                val imageRes = when {
+                    health >= i * 2 -> R.drawable.ic_heart_full      // Case: Completely Full
+                    health == (i * 2) - 1 -> R.drawable.ic_heart_half // Case: Half Full
+                    else -> R.drawable.ic_heart_empty                 // Case: Empty
+                }
+
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+
+        // --- COIN SECTION ---
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "$coinCount",
+                color = androidx.compose.ui.graphics.Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_coin),
+                contentDescription = "Coins",
+                modifier = Modifier.size(32.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+    }
+}
 @Preview(showBackground = true)
 @Composable
 fun RoomScreenPreview() {
     SaveKittyTheme {
         RoomScreen(
-            currentHealth = 1,
+            currentHealth = 3,
             onTableClick = {},
             onDoorClick = {},
             onBowlClick = {}
         )
     }
 }
+
