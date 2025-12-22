@@ -1,20 +1,18 @@
 package com.example.savekitty.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color // Import this for the debug color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.example.savekitty.R
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.savekitty.ui.theme.SaveKittyTheme
 
 @Composable
 fun RoomScreen(
@@ -27,55 +25,71 @@ fun RoomScreen(
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        // --- LAYER 1: BACKGROUND (The Artwork) ---
+        // --- LAYER 1: THE EMPTY ROOM ---
         Image(
             painter = painterResource(id = R.drawable.background),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillBounds, // Stretches to fit any phone perfectly
             modifier = Modifier.fillMaxSize()
         )
 
-        // --- LAYER 2: INVISIBLE HOTSPOTS (Clickable Zones) ---
-        // Adjust the numbers (0.5f = 50%) to match your specific image!
+        // --- LAYER 2: THE OBJECTS (Real Images) ---
 
-        // 🚪 DOOR HOTSPOT
-        Box(
+        // 🚪 DOOR
+        Image(
+            painter = painterResource(id = R.drawable.door),
+            contentDescription = "Shop",
+            contentScale = ContentScale.FillBounds, // Keeps the door's aspect ratio
             modifier = Modifier
                 .offset(
-                    x = screenWidth * 0.6f, // Move Left/Right
-                    y = screenHeight * 0.2f  // Move Up/Down
+                    x = screenWidth * 0.565f,
+                    y = screenHeight * 0.225f
                 )
-                .size(screenWidth * 0.25f) // How big is the door?
-                // 👇 TEMPORARY: Keep this RED line while you adjust sizes. Delete it when done!
-                .background(Color.Red.copy(alpha = 0.3f))
+                .size(width = screenWidth * 0.255f, height = screenHeight * 0.39f) // Width of the door
                 .clickable { onDoorClick() }
         )
 
-        // 🪑 TABLE HOTSPOT
-        Box(
+        // 🪑 TABLE
+        Image(
+            painter = painterResource(id = R.drawable.table),
+            contentDescription = "Work Table",
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .offset(
-                    x = screenWidth * 0.05f,
-                    y = screenHeight * 0.5f
+                    x = screenWidth * 0f,
+                    y = screenHeight * 0.57f
                 )
-                .size(screenWidth * 0.5f)
-                .background(Color.Blue.copy(alpha = 0.3f)) // Debug Color
+                .size(width = screenWidth * 0.45f, height = screenHeight * 0.43f) // Width of the table
                 .clickable { onTableClick() }
         )
 
-        // 🥣 BOWL HOTSPOT
-        Box(
+        // 🥣 BOWL
+        Image(
+            painter = painterResource(id = R.drawable.bowl),
+            contentDescription = "Food Bowl",
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .offset(
-                    x = screenWidth * 0.4f,
-                    y = screenHeight * 0.7f
+                    x = screenWidth * 0.515f,
+                    y = screenHeight * 0.76f
                 )
-                .size(screenWidth * 0.15f)
-                .background(Color.Green.copy(alpha = 0.3f)) // Debug Color
+                .size(width = screenWidth * 0.3f, height = screenHeight * 0.11f) // Width of the bowl
                 .clickable { onBowlClick() }
         )
 
-        // --- LAYER 3: THE KITTY ---
-        // (We can add the kitty back once the furniture works!)
+        // --- LAYER 3: THE KITTY (Coming soon) ---
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RoomScreenPreview() {
+    SaveKittyTheme {
+        RoomScreen(
+            currentHealth = 5,
+            onTableClick = {},
+            onDoorClick = {},
+            onBowlClick = {}
+        )
     }
 }
