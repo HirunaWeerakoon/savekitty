@@ -21,6 +21,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.composed
+import com.example.savekitty.ui.FeedingPopup
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
@@ -30,6 +31,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -41,10 +44,14 @@ fun RoomScreen(
     currentHealth: Int = 10,
     coinCount: Int = 100,
     onTableClick: () -> Unit,
+    fishCount: Int,
+    onBuyFish: () -> Unit,
+    onFeedCat: () -> Unit,
     onDoorClick: () -> Unit,
-    onBowlClick: () -> Unit,
     onCatClick: () -> Unit = {}
 ) {
+    var showFeedingPopup by remember { mutableStateOf(false) }
+
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
             .systemBarsPadding()
@@ -111,7 +118,9 @@ fun RoomScreen(
                     y = screenHeight * 0.76f
                 )
                 .size(width = screenWidth * 0.3f, height = screenHeight * 0.11f) // Width of the bowl
-                .gameClick (interactionSource = bowlSource) { onBowlClick() }
+                .gameClick(interactionSource = bowlSource) {
+                    showFeedingPopup = true
+                }
         )
 
 
@@ -157,7 +166,21 @@ fun RoomScreen(
             health = currentHealth,
             coinCount = coinCount
         )
+        // --- LAYER 5: POPUPS ---
+        if (showFeedingPopup) {
+            FeedingPopup(
+                fishCount = fishCount,
+                onFeed = {
+                    onFeedCat()
+                    // Optional: Close popup after feeding?
+                    // showFeedingPopup = false
+                },
+                onClose = { showFeedingPopup = false },
+                onBuyFish = onBuyFish
+            )
+        }
     }
+
 }
 
 
@@ -265,7 +288,12 @@ fun RoomScreenPreview() {
             currentHealth = 3,
             onTableClick = {},
             onDoorClick = {},
-            onBowlClick = {}
+            onCatClick = {},
+            coinCount = 100,
+            fishCount = 0,
+            onBuyFish = {},
+            onFeedCat = {}
+
         )
     }
 }

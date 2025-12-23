@@ -32,15 +32,17 @@ class MainActivity : ComponentActivity() {
                 // "collectAsState" automatically updates the UI when values change
                 val health by viewModel.health.collectAsState()
                 val coins by viewModel.coins.collectAsState()
+                val fish by viewModel.fishCount.collectAsState()
 
                 // 2. Pass State & Actions to the Screen
                 RoomScreen(
                     currentHealth = health,
                     coinCount = coins,
-                    onTableClick = { /* TODO: Navigate to Timer */ },
-                    onDoorClick = { /* TODO: Navigate to Shop */ },
-                    // Connect the UI events directly to the ViewModel functions
-                    onBowlClick = { viewModel.feedKitty() },
+                    fishCount = fish, // <--- Pass it
+                    onBuyFish = { viewModel.buyFish() }, // <--- Connect Action
+                    onFeedCat = { viewModel.consumeFish() }, // <--- Connect Action
+                    onTableClick = { /* Navigate Timer */ },
+                    onDoorClick = { /* Navigate Shop */ },
                     onCatClick = { viewModel.onCatClick() }
                 )
             }
