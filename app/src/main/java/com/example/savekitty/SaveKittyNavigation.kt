@@ -6,10 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.savekitty.presentation.shop.ShopScreen
 import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
 import com.example.savekitty.ui.RoomScreen
 import com.example.savekitty.viewModel.GameViewModel
+import com.example.savekitty.viewModel.TodoItem
 
 @Composable
 fun SaveKittyNavigation(viewModel: GameViewModel) {
@@ -21,6 +23,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val fish by viewModel.fishCount.collectAsState()
     val timeLeft by viewModel.timeLeft.collectAsState()
     val isTimerRunning by viewModel.isTimerRunning.collectAsState()
+    val todoList by viewModel.todoList.collectAsState()
 
     // 2. The Navigation Graph
     NavHost(
@@ -39,7 +42,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                     // Navigate to Timer
                     navController.navigate("desk")
                 },
-                onDoorClick = { /* Will navigate to Shop later */ },
+                onDoorClick = { navController.navigate("shop") },
                 onCatClick = { viewModel.onCatClick() }
             )
         }
@@ -47,8 +50,12 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
             TimerScreen(
                 timeLeft = timeLeft,
                 isTimerRunning = isTimerRunning,
-                onLaptopClick = { navController.navigate("laptop_zoom") }, // Zoom In
-                onBackClick = { navController.popBackStack() } // Back to Room
+                todoList = todoList, // <--- PASS DATA
+                onAddTodo = { viewModel.addTodo(it) },
+                onToggleTodo = { viewModel.toggleTodo(it) },
+                onDeleteTodo = { viewModel.deleteTodo(it) },
+                onLaptopClick = { navController.navigate("laptop_zoom") },
+                onBackClick = { navController.popBackStack() }
             )
         }
         composable("laptop_zoom") {
@@ -58,6 +65,13 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onToggleTimer = { viewModel.toggleTimer() },
                 onSetTime = { minutes -> viewModel.setTimer(minutes) },
                 onBackClick = { navController.popBackStack() } // Back to Desk
+            )
+        }
+        composable("shop") {
+            ShopScreen(
+                coinCount = coins,
+                onBuyFish = { viewModel.buyFish() },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

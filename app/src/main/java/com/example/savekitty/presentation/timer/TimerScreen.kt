@@ -29,14 +29,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import com.example.savekitty.viewModel.TodoItem
 
 @Composable
 fun TimerScreen(
     timeLeft: Int,
     isTimerRunning: Boolean,
+    todoList: List<TodoItem>, // <--- NEW
+    onAddTodo: (String) -> Unit, // <--- NEW
+    onToggleTodo: (Long) -> Unit, // <--- NEW
+    onDeleteTodo: (Long) -> Unit, // <--- NEW
     onLaptopClick: () -> Unit,
-    onBackClick: () -> Unit // If you want a way to go back to Room
+    onBackClick: () -> Unit
 ) {
+    var showNotebook by remember { mutableStateOf(false) }
+
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
             .systemBarsPadding()
@@ -96,7 +103,7 @@ fun TimerScreen(
             modifier = Modifier
                 .offset(x = screenWidth * 0.22f, y = screenHeight * 0.7f)
                 .size(screenWidth * 0.4f)
-                .clickable { /* Open Todo List Logic */ }
+                .clickable { showNotebook = true }
         )
 
         // --- LAYER 5: THE LAPTOP 💻 ---
@@ -150,6 +157,16 @@ fun TimerScreen(
                 fontSize = 16.sp
             )
         }
+        // --- LAYER 7: NOTEBOOK OVERLAY ---
+        if (showNotebook) {
+            NotebookDialog(
+                tasks = todoList,
+                onAdd = onAddTodo,
+                onToggle = onToggleTodo,
+                onDelete = onDeleteTodo,
+                onClose = { showNotebook = false }
+            )
+        }
     }
 }
 
@@ -161,7 +178,11 @@ fun TimerScreenPreview() {
             timeLeft = 20,
             isTimerRunning = true,
             onLaptopClick = {},
-            onBackClick = {}
+            onBackClick = {},
+            todoList = emptyList(),
+            onAddTodo = {},
+            onToggleTodo = {},
+            onDeleteTodo = {}
 
         )
     }

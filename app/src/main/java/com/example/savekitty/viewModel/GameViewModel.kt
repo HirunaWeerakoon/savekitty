@@ -22,6 +22,9 @@ class GameViewModel : ViewModel() {
     val timeLeft = GameRepository.timeLeft
     val isTimerRunning = GameRepository.isTimerRunning
 
+    private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoList = _todoList.asStateFlow()
+
     init {
         // Start the Heartbeat of the Timer
         viewModelScope.launch {
@@ -53,5 +56,26 @@ class GameViewModel : ViewModel() {
 
     fun onCatClick() {
         GameRepository.earnCoins(1)
+    }
+    fun addTodo(text: String) {
+        if (text.isBlank()) return
+        val newItem = TodoItem(text = text)
+        _todoList.update { currentList ->
+            currentList + newItem
+        }
+    }
+
+    fun toggleTodo(itemId: Long) {
+        _todoList.update { currentList ->
+            currentList.map { item ->
+                if (item.id == itemId) item.copy(isDone = !item.isDone) else item
+            }
+        }
+    }
+
+    fun deleteTodo(itemId: Long) {
+        _todoList.update { currentList ->
+            currentList.filter { it.id != itemId }
+        }
     }
 }
