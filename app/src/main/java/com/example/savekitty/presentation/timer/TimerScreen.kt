@@ -25,6 +25,10 @@ import androidx.compose.ui.unit.sp
 import com.example.savekitty.R
 import com.example.savekitty.ui.RoomScreen
 import com.example.savekitty.ui.theme.SaveKittyTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 
 @Composable
 fun TimerScreen(
@@ -33,7 +37,10 @@ fun TimerScreen(
     onLaptopClick: () -> Unit,
     onBackClick: () -> Unit // If you want a way to go back to Room
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
+            .systemBarsPadding()
+    ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
@@ -125,6 +132,23 @@ fun TimerScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+        }
+        // --- LAYER 6: UI CONTROLS (Back Button) 🔙 ---
+        Button(
+            onClick = onBackClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black.copy(alpha = 0.3f) // Semi-transparent black
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomCenter) // Place at the bottom
+                .padding(bottom = 40.dp)       // Give it some space from the edge
+        ) {
+            Text(
+                text = "▼ Return to Room",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
         }
     }
 }

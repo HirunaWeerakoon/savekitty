@@ -74,5 +74,6 @@ dependencies {
     // 5. Extended Icons (For more pixel-like icons if needed)
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.preferences)
 
 }
