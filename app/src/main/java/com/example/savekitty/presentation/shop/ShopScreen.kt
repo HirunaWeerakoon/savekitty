@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,11 +31,16 @@ fun ShopScreen(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val pixelFont = FontFamily.Monospace
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(Color.Black)
+            .systemBarsPadding()
+            ) {
         // --- LAYER 1: BACKGROUND ---
         // If you don't have bg_shop yet, this grey box acts as a placeholder
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF5D4037)))
+        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF8D6E63)))
 
 
 

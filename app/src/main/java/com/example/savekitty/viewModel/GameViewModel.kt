@@ -24,6 +24,11 @@ class GameViewModel : ViewModel() {
     val isTimerRunning = GameRepository.isTimerRunning
     val todoList = GameRepository.todoList
 
+    val PixelFontStyle = androidx.compose.ui.text.TextStyle(
+        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+    )
+
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
 
 
