@@ -1,4 +1,4 @@
-package com.example.savekitty.viewModel
+package com.example.savekitty.data
 
 data class TodoItem(
     val id: Long = System.currentTimeMillis(), // Unique ID based on time

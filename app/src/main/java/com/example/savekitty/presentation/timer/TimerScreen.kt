@@ -29,7 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import com.example.savekitty.viewModel.TodoItem
+import com.example.savekitty.data.TodoItem
 
 @Composable
 fun TimerScreen(

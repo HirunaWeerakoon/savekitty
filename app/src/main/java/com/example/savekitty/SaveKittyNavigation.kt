@@ -11,7 +11,7 @@ import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
 import com.example.savekitty.ui.RoomScreen
 import com.example.savekitty.viewModel.GameViewModel
-import com.example.savekitty.viewModel.TodoItem
+import com.example.savekitty.data.TodoItem
 
 @Composable
 fun SaveKittyNavigation(viewModel: GameViewModel) {
