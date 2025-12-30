@@ -1,6 +1,7 @@
 package com.example.savekitty.presentation.timer
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -29,7 +30,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.icons.Icons
 import com.example.savekitty.data.TodoItem
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.text.font.FontFamily
 
 @Composable
 fun TimerScreen(
@@ -46,7 +52,9 @@ fun TimerScreen(
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
+            .background(Color.Black)
             .systemBarsPadding()
+
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
@@ -127,34 +135,33 @@ fun TimerScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .offset(y = (-20).dp), // Nudge up to fit in screen area
+                    .offset(y = (-10).dp),
                 contentAlignment = Alignment.Center
             ) {
                 val minutes = timeLeft / 60
                 val seconds = timeLeft % 60
                 Text(
                     text = "%02d:%02d".format(minutes, seconds),
-                    color = Color.Green, // Hacker style?
+                    color = Color(0xFF00FF00), // Hacker Green
+                    fontFamily = FontFamily.Monospace, // Pixel Font
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
         // --- LAYER 6: UI CONTROLS (Back Button) 🔙 ---
-        Button(
+        IconButton(
             onClick = onBackClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black.copy(alpha = 0.3f) // Semi-transparent black
-            ),
             modifier = Modifier
-                .align(Alignment.BottomCenter) // Place at the bottom
-                .padding(bottom = 40.dp)       // Give it some space from the edge
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 48.dp)
+                .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape)
         ) {
-            Text(
-                text = "▼ Return to Room",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Return",
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
             )
         }
         // --- LAYER 7: NOTEBOOK OVERLAY ---
