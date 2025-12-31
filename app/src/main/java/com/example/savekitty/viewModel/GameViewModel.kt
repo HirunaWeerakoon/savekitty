@@ -3,13 +3,12 @@ package com.example.savekitty.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import com.example.savekitty.data.GameRepository
+import com.example.savekitty.data.SoundManager
 import com.example.savekitty.data.TodoItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.time.delay
+import com.example.savekitty.data.NotificationHelper
 
 
 
@@ -24,6 +23,9 @@ class GameViewModel : ViewModel() {
     val isTimerRunning = GameRepository.isTimerRunning
     val todoList = GameRepository.todoList
 
+    private var soundManager: SoundManager? = null
+    private var notificationHelper: NotificationHelper? = null
+
     val PixelFontStyle = androidx.compose.ui.text.TextStyle(
         fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
@@ -33,11 +35,25 @@ class GameViewModel : ViewModel() {
 
 
     init {
-        // Start the Heartbeat of the Timer
+        // Start the Heartbeat of the Timer 💓
         viewModelScope.launch {
             while (true) {
-                delay(1000L)
+                delay(1000L) // Wait 1 second
+
+                // 1. Capture state BEFORE the tick
+                val timeBefore = timeLeft.value
+                val wasRunning = isTimerRunning.value
+
+                // 2. Tick the timer
                 GameRepository.tickTimer()
+
+                // 3. Check if it JUST finished
+                // (It was running, it had time left, and NOW it is 0)
+                if (wasRunning && timeBefore > 0 && timeLeft.value == 0) {
+                    soundManager?.playLevelUp()       // 🔊 DING!
+                    notificationHelper?.showTimerComplete() // 🔔 Notification
+                    completeStudySession()            // 🍪 Reward (+10 Biscuits)
+                }
             }
         }
     }
@@ -46,14 +62,47 @@ class GameViewModel : ViewModel() {
 
     // 2. Actions (Delegate to Repository)
     fun completeStudySession() {
-        GameRepository.earnCoins(10)
+        GameRepository.earnBiscuits(10)
     }
+    fun setSoundManager(manager: SoundManager) {
+        this.soundManager = manager
+    }
+    fun setNotificationHelper(helper: NotificationHelper) { this.notificationHelper = helper }
 
-    fun buyFish() = GameRepository.buyFish()
+    fun buyFish() {
+        // We check if the purchase was successful first
+        if (GameRepository.coins.value >= 5) { // Check repository value
+            GameRepository.buyFish() // Perform logic
+            soundManager?.playChing() // <--- KA-CHING! 💰
+        }
+    }
     fun consumeFish() = GameRepository.eatFish()
 
     fun onCatClick() {
-        GameRepository.earnCoins(1)
+        GameRepository.earnBiscuits(1)
+        soundManager?.playMeow()
+    }
+    fun startMeowTest() {
+        viewModelScope.launch {
+            // Wait 10 seconds
+            delay(10000)
+            // Send the notification
+            notificationHelper?.showMeowNotification()
+            // Optional: Play sound too
+            soundManager?.playMeow()
+        }
+    }
+    fun onAppBackgrounded() {
+        viewModelScope.launch {
+            // Wait 10 seconds (change to 600000 for 10 minutes later)
+            delay(10_000)
+
+            // Send the notification
+            notificationHelper?.showMeowNotification()
+
+            // Optional: Log it so you know it ran
+            println("Meow notification sent!")
+        }
     }
     fun addTodo(text: String) = GameRepository.addTodo(text)
 

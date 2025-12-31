@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
 
 @Composable
 fun RoomScreen(
@@ -58,6 +59,13 @@ fun RoomScreen(
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
+
+        val biscuitFrames = listOf(
+            R.drawable.cat_knead_0,
+            R.drawable.cat_knead_1,
+            R.drawable.cat_knead_2,
+            R.drawable.cat_knead_1
+        )
 
         // --- LAYER 1: THE EMPTY ROOM ---
         Image(

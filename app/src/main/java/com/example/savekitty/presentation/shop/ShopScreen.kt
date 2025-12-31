@@ -64,7 +64,7 @@ fun ShopScreen(
             Text("Coins: $coinCount", color = Color.Yellow, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(4.dp))
             Image(
-                painter = painterResource(id = R.drawable.ic_coin),
+                painter = painterResource(id = R.drawable.ic_biscuit),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )

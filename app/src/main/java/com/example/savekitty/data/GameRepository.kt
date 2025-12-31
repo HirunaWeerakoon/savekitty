@@ -7,9 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collectLatest
 
 // A Singleton Repository that holds the "Truth" of the game state.
 // In a real app, this would save to a Database (Room) or DataStore.
@@ -19,8 +17,8 @@ object GameRepository {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // 1. GAME STATE
-    private val _coins = MutableStateFlow(100)
-    val coins = _coins.asStateFlow()
+    private val _biscuits = MutableStateFlow(100)
+    val coins = _biscuits.asStateFlow()
 
     private val _health = MutableStateFlow(5) // 0 to 10 scale
     val health = _health.asStateFlow()
@@ -42,7 +40,7 @@ object GameRepository {
 
         // Sync: When Disk changes -> Update Memory
         scope.launch {
-            storage?.coinsFlow?.collectLatest { _coins.value = it }
+            storage?.coinsFlow?.collectLatest { _biscuits.value = it }
         }
         scope.launch {
             storage?.healthFlow?.collectLatest { _health.value = it }
@@ -71,15 +69,15 @@ object GameRepository {
             _isTimerRunning.value = false
         }
     }
-    fun earnCoins(amount: Int) {
-        val newValue = _coins.value + amount
+    fun earnBiscuits(amount: Int) {
+        val newValue = _biscuits.value + amount
         // 2. Save to Disk (UI updates automatically via the Sync above)
         scope.launch { storage?.saveCoins(newValue) }
     }
 
     fun spendCoins(amount: Int): Boolean {
-        if (_coins.value >= amount) {
-            val newValue = _coins.value - amount
+        if (_biscuits.value >= amount) {
+            val newValue = _biscuits.value - amount
             scope.launch { storage?.saveCoins(newValue) }
             return true
         }
