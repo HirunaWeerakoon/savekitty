@@ -36,6 +36,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.ImageBitmap
+import com.example.savekitty.presentation.timer.NotebookDialog
+import com.example.savekitty.presentation.pixelClickable
 
 @Composable
 fun TimerScreen(
@@ -46,7 +50,8 @@ fun TimerScreen(
     onToggleTodo: (Long) -> Unit, // <--- NEW
     onDeleteTodo: (Long) -> Unit, // <--- NEW
     onLaptopClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onBooksClick: () -> Unit
 ) {
     var showNotebook by remember { mutableStateOf(false) }
 
@@ -58,6 +63,8 @@ fun TimerScreen(
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
+        val notebookBitmap = ImageBitmap.imageResource(id = R.drawable.prop_notebook)
+        val booksBitmap = ImageBitmap.imageResource(id = R.drawable.prop_books)
 
         // --- LAYER 1: BACKGROUND (The Desk) ---
         Image(
@@ -82,12 +89,13 @@ fun TimerScreen(
         // --- LAYER 3: BOOKS & CAT 📚🐱 ---
         // The Book Stack
         Image(
-            painter = painterResource(id = R.drawable.prop_books),
-            contentDescription = "Books",
+            bitmap = booksBitmap,
+            contentDescription = "Stats",
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .offset(x = screenWidth * 0.24f, y = screenHeight * 0.63f)
                 .size(screenWidth * 0.33f)
+                .pixelClickable(imageBitmap = booksBitmap) { onBooksClick() }
         )
 
         // The Cat (Sitting on books)
@@ -105,13 +113,13 @@ fun TimerScreen(
 
         // --- LAYER 4: THE NOTEBOOK (Todo) 📝 ---
         Image(
-            painter = painterResource(id = R.drawable.prop_notebook),
+            bitmap = notebookBitmap,
             contentDescription = "Notebook",
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .offset(x = screenWidth * 0.22f, y = screenHeight * 0.7f)
                 .size(screenWidth * 0.4f)
-                .clickable { showNotebook = true }
+                .pixelClickable(imageBitmap = notebookBitmap) { showNotebook = true }
         )
 
         // --- LAYER 5: THE LAPTOP 💻 ---
@@ -189,7 +197,8 @@ fun TimerScreenPreview() {
             todoList = emptyList(),
             onAddTodo = {},
             onToggleTodo = {},
-            onDeleteTodo = {}
+            onDeleteTodo = {},
+            onBooksClick = {}
 
         )
     }

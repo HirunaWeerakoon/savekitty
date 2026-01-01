@@ -60,13 +60,6 @@ fun RoomScreen(
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        val biscuitFrames = listOf(
-            R.drawable.cat_knead_0,
-            R.drawable.cat_knead_1,
-            R.drawable.cat_knead_2,
-            R.drawable.cat_knead_1
-        )
-
         // --- LAYER 1: THE EMPTY ROOM ---
         Image(
             painter = painterResource(id = R.drawable.background),
@@ -280,7 +273,7 @@ fun GameOverlay(
                 fontWeight = FontWeight.Bold
             )
             Image(
-                painter = painterResource(id = R.drawable.ic_coin),
+                painter = painterResource(id = R.drawable.ic_biscuit),
                 contentDescription = "Coins",
                 modifier = Modifier.size(32.dp),
                 contentScale = ContentScale.Fit

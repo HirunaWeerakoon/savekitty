@@ -17,11 +17,13 @@ class GameViewModel : ViewModel() {
     // 1. GAME STATE (Private so only this class can change it)
     // Start with 1 health (Half Heart) for testing
     val health = GameRepository.health
-    val coins = GameRepository.coins
+    val biscuits = GameRepository.biscuits
     val fishCount = GameRepository.fishCount
     val timeLeft = GameRepository.timeLeft
     val isTimerRunning = GameRepository.isTimerRunning
     val todoList = GameRepository.todoList
+
+    val history = GameRepository.history
 
     private var soundManager: SoundManager? = null
     private var notificationHelper: NotificationHelper? = null
@@ -32,6 +34,7 @@ class GameViewModel : ViewModel() {
     )
 
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
+
 
 
     init {
@@ -52,6 +55,7 @@ class GameViewModel : ViewModel() {
                 if (wasRunning && timeBefore > 0 && timeLeft.value == 0) {
                     soundManager?.playLevelUp()       // 🔊 DING!
                     notificationHelper?.showTimerComplete() // 🔔 Notification
+                    GameRepository.recordSession(25)
                     completeStudySession()            // 🍪 Reward (+10 Biscuits)
                 }
             }
@@ -71,7 +75,7 @@ class GameViewModel : ViewModel() {
 
     fun buyFish() {
         // We check if the purchase was successful first
-        if (GameRepository.coins.value >= 5) { // Check repository value
+        if (GameRepository.biscuits.value >= 5) { // Check repository value
             GameRepository.buyFish() // Perform logic
             soundManager?.playChing() // <--- KA-CHING! 💰
         }

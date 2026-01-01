@@ -18,7 +18,7 @@ object GameRepository {
 
     // 1. GAME STATE
     private val _biscuits = MutableStateFlow(100)
-    val coins = _biscuits.asStateFlow()
+    val biscuits = _biscuits.asStateFlow()
 
     private val _health = MutableStateFlow(5) // 0 to 10 scale
     val health = _health.asStateFlow()
@@ -35,12 +35,15 @@ object GameRepository {
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
     val todoList = _todoList.asStateFlow()
 
+    private val _history = MutableStateFlow<List<StudySession>>(emptyList())
+    val history = _history.asStateFlow()
+
     fun initialize(context: Context) {
         storage = GameStorage(context)
 
         // Sync: When Disk changes -> Update Memory
         scope.launch {
-            storage?.coinsFlow?.collectLatest { _biscuits.value = it }
+            storage?.biscuitsFlow?.collectLatest { _biscuits.value = it }
         }
         scope.launch {
             storage?.healthFlow?.collectLatest { _health.value = it }
@@ -50,6 +53,12 @@ object GameRepository {
         }
         scope.launch {
             storage?.todoListFlow?.collectLatest { _todoList.value = it }
+        }
+        scope.launch {
+            storage?.biscuitsFlow?.collectLatest { _biscuits.value = it }
+        }
+        scope.launch {
+            storage?.historyFlow?.collectLatest { _history.value = it }
         }
     }
 
@@ -72,13 +81,13 @@ object GameRepository {
     fun earnBiscuits(amount: Int) {
         val newValue = _biscuits.value + amount
         // 2. Save to Disk (UI updates automatically via the Sync above)
-        scope.launch { storage?.saveCoins(newValue) }
+        scope.launch { storage?.saveBiscuits(newValue) }
     }
 
-    fun spendCoins(amount: Int): Boolean {
+    fun spendBiscuits(amount: Int): Boolean {
         if (_biscuits.value >= amount) {
             val newValue = _biscuits.value - amount
-            scope.launch { storage?.saveCoins(newValue) }
+            scope.launch { storage?.saveBiscuits(newValue) }
             return true
         }
         return false
@@ -89,8 +98,8 @@ object GameRepository {
         scope.launch { storage?.saveFish(newValue) }
     }
     fun buyFish() {
-        // Logic: Try to spend 5 coins. If successful, add 1 fish.
-        if (spendCoins(5)) {
+        // Logic: Try to spend 5 biscuits. If successful, add 1 fish.
+        if (spendBiscuits(5)) {
             addFish(1)
         }
     }
@@ -132,5 +141,12 @@ object GameRepository {
         _todoList.value = newList
         // 2. Update Disk (Background save)
         scope.launch { storage?.saveTodoList(newList) }
+    }
+    fun recordSession(minutes: Int) {
+        val newSession = StudySession(durationMinutes = minutes)
+        val newList = _history.value + newSession
+
+        _history.value = newList
+        scope.launch { storage?.saveHistory(newList) }
     }
 }

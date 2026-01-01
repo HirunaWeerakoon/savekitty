@@ -18,16 +18,17 @@ class GameStorage(private val context: Context) {
     private val gson = Gson()
     // Define the Keys
     companion object {
-        val KEY_COINS = intPreferencesKey("coins")
+        val KEY_BISCUITS = intPreferencesKey("biscuits")
         val KEY_HEALTH = intPreferencesKey("health")
         val KEY_FISH = intPreferencesKey("fish")
         val KEY_TODO_LIST = stringPreferencesKey("todo_list")
+        val KEY_HISTORY = stringPreferencesKey("study_history")
     }
 
     // --- READ DATA (Flows) ---
     // If no data exists, return default values (100 coins, 5 health)
-    val coinsFlow: Flow<Int> = context.dataStore.data
-        .map { preferences -> preferences[KEY_COINS] ?: 100 }
+    val biscuitsFlow: Flow<Int> = context.dataStore.data
+        .map { preferences -> preferences[KEY_BISCUITS] ?: 100 }
 
     val healthFlow: Flow<Int> = context.dataStore.data
         .map { preferences -> preferences[KEY_HEALTH] ?: 5 }
@@ -46,6 +47,17 @@ class GameStorage(private val context: Context) {
                 gson.fromJson(json, type)
             }
         }
+    val historyFlow: Flow<List<StudySession>> = context.dataStore.data
+        .map { preferences ->
+            val json = preferences[KEY_HISTORY] ?: ""
+            if (json.isEmpty()) {
+                emptyList()
+            } else {
+                val type = object : TypeToken<List<StudySession>>() {}.type
+                gson.fromJson(json, type)
+            }
+        }
+
 
     // --- WRITE TODO LIST ---
     suspend fun saveTodoList(list: List<TodoItem>) {
@@ -54,8 +66,8 @@ class GameStorage(private val context: Context) {
     }
 
     // --- WRITE DATA (Suspend Functions) ---
-    suspend fun saveCoins(amount: Int) {
-        context.dataStore.edit { it[KEY_COINS] = amount }
+    suspend fun saveBiscuits(amount: Int) {
+        context.dataStore.edit { it[KEY_BISCUITS] = amount }
     }
 
     suspend fun saveHealth(amount: Int) {
@@ -64,5 +76,9 @@ class GameStorage(private val context: Context) {
 
     suspend fun saveFish(amount: Int) {
         context.dataStore.edit { it[KEY_FISH] = amount }
+    }
+    suspend fun saveHistory(list: List<StudySession>) {
+        val json = gson.toJson(list)
+        context.dataStore.edit { it[KEY_HISTORY] = json }
     }
 }

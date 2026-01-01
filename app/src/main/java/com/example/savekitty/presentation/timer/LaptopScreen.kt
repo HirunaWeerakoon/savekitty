@@ -1,5 +1,6 @@
 package com.example.savekitty.presentation.timer
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -9,9 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.savekitty.R
+import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
 
 @Composable
 fun LaptopScreen(
@@ -21,6 +25,12 @@ fun LaptopScreen(
     onSetTime: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val biscuitFrames = listOf(
+        R.drawable.cat_knead_0,
+        R.drawable.cat_knead_1,
+        R.drawable.cat_knead_2,
+        R.drawable.cat_knead_1
+    )
     // We simulate the Laptop Screen UI here
     Column(
         modifier = Modifier
@@ -29,6 +39,26 @@ fun LaptopScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Box(
+            modifier = Modifier.height(200.dp), // Dedicated space for the cat
+            contentAlignment = Alignment.Center
+        ) {
+            if (isTimerRunning) {
+                // ANIMATION: Working hard!
+                SpriteAnimation(
+                    frames = biscuitFrames,
+                    frameDurationMillis = 200,
+                    modifier = Modifier.size(180.dp) // Adjust size as needed
+                )
+            } else {
+                // IDLE: Waiting for you to start
+                Image(
+                    painter = painterResource(id = R.drawable.cat_knead_0), // Idle pose
+                    contentDescription = "Idle Cat",
+                    modifier = Modifier.size(180.dp)
+                )
+            }
+        }
         // 1. The Big Timer
         val minutes = timeLeft / 60
         val seconds = timeLeft % 60

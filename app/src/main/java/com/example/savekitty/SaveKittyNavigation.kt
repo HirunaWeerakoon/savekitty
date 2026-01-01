@@ -11,7 +11,7 @@ import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
 import com.example.savekitty.ui.RoomScreen
 import com.example.savekitty.viewModel.GameViewModel
-import com.example.savekitty.data.TodoItem
+import com.example.savekitty.presentation.StatsScreen
 
 @Composable
 fun SaveKittyNavigation(viewModel: GameViewModel) {
@@ -19,7 +19,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
 
     // 1. Collect State from ViewModel (One place to rule them all)
     val health by viewModel.health.collectAsState()
-    val coins by viewModel.coins.collectAsState()
+    val coins by viewModel.biscuits.collectAsState()
     val fish by viewModel.fishCount.collectAsState()
     val timeLeft by viewModel.timeLeft.collectAsState()
     val isTimerRunning by viewModel.isTimerRunning.collectAsState()
@@ -55,7 +55,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onToggleTodo = { viewModel.toggleTodo(it) },
                 onDeleteTodo = { viewModel.deleteTodo(it) },
                 onLaptopClick = { navController.navigate("laptop_zoom") },
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onBooksClick = { navController.navigate("stats") }
             )
         }
         composable("laptop_zoom") {
@@ -71,6 +72,15 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
             ShopScreen(
                 coinCount = coins,
                 onBuyFish = { viewModel.buyFish() },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("stats") {
+            val history by viewModel.history.collectAsState()
+
+            StatsScreen(
+                history = history,
                 onBackClick = { navController.popBackStack() }
             )
         }
