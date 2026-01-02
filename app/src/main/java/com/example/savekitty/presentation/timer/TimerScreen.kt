@@ -62,7 +62,6 @@ fun TimerScreen(
 
 ) {
     var showNotebook by remember { mutableStateOf(false) }
-    var isMuted by remember { mutableStateOf(false) }
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -206,10 +205,7 @@ fun TimerScreen(
         // 2. The Mute Button (Top Left)
         MuteButton(
             isMuted = isMuted,
-            onToggle = {
-                isMuted = !isMuted
-                onToggleMute()
-            },
+            onToggle = onToggleMute,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

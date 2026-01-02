@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savekitty.presentation.GameOverlay
+import com.example.savekitty.presentation.MuteButton
 import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
 
 @Composable
@@ -168,7 +169,13 @@ fun RoomScreen(
         )
         GameOverlay(
             health = currentHealth,
-            coinCount = coinCount
+            coinCount = coinCount,
+            modifier = Modifier.align(Alignment.TopEnd)
+        )
+        MuteButton(
+            isMuted = isMuted,
+            onToggle = onToggleMute,
+            modifier = Modifier.align(Alignment.TopStart)
         )
         // --- LAYER 5: POPUPS ---
         if (showFeedingPopup) {

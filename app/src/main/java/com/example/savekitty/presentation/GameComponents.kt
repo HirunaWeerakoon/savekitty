@@ -89,11 +89,11 @@ fun MuteButton(
     ) {
         // Use standard icons if you don't have custom pngs yet
         val iconRes = if (isMuted) R.drawable.ic_volume_off else R.drawable.ic_volume_up
-        Icon(
+        Image(
             painter = painterResource(id = iconRes),
             contentDescription = "Mute Toggle",
-            tint = Color.White,
-            modifier = Modifier.padding(12.dp)
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.padding(10.dp) // Adjust padding to make icon fit nicely inside circle
         )
     }
 }
