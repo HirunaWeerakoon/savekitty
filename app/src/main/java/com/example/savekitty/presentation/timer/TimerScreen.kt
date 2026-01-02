@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import com.example.savekitty.data.TodoItem
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -40,6 +41,8 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.ImageBitmap
 import com.example.savekitty.presentation.timer.NotebookDialog
 import com.example.savekitty.presentation.pixelClickable
+import com.example.savekitty.presentation.GameOverlay
+import com.example.savekitty.presentation.MuteButton
 
 @Composable
 fun TimerScreen(
@@ -49,11 +52,17 @@ fun TimerScreen(
     onAddTodo: (String) -> Unit, // <--- NEW
     onToggleTodo: (Long) -> Unit, // <--- NEW
     onDeleteTodo: (Long) -> Unit, // <--- NEW
+    currentHealth: Int, // <--- Add this
+    coinCount: Int,     // <--- Add this
+    onToggleMute: () -> Unit, // <--- Add this
     onLaptopClick: () -> Unit,
     onBackClick: () -> Unit,
-    onBooksClick: () -> Unit
+    onBooksClick: () -> Unit,
+    isMuted: Boolean,
+
 ) {
     var showNotebook by remember { mutableStateOf(false) }
+    var isMuted by remember { mutableStateOf(false) }
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -83,7 +92,10 @@ fun TimerScreen(
             modifier = Modifier
                 .offset(x = screenWidth * (-0.104f), y = screenHeight * 0.55f) // Adjust these!
                 .size(screenWidth * 0.5f)
-                .clickable { isLampOn = !isLampOn }
+                .clickable {
+                    isLampOn = !isLampOn
+
+                }
         )
 
         // --- LAYER 3: BOOKS & CAT 📚🐱 ---
@@ -162,14 +174,15 @@ fun TimerScreen(
             onClick = onBackClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 48.dp)
-                .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape)
+                .padding(bottom = 32.dp)
+                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                .size(48.dp)
+
         ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Return",
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
+            Image(
+                painter = painterResource(id = R.drawable.ic_back_arrow),
+                contentDescription = "Exit",
+                modifier = Modifier
             )
         }
         // --- LAYER 7: NOTEBOOK OVERLAY ---
@@ -182,6 +195,23 @@ fun TimerScreen(
                 onClose = { showNotebook = false }
             )
         }
+        // --- LAYER 8: HUD & MUTE (On Top) ---
+        // 1. The Stats (Top Right)
+        GameOverlay(
+            health = currentHealth,
+            coinCount = coinCount,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+
+        // 2. The Mute Button (Top Left)
+        MuteButton(
+            isMuted = isMuted,
+            onToggle = {
+                isMuted = !isMuted
+                onToggleMute()
+            },
+            modifier = Modifier.align(Alignment.TopStart)
+        )
     }
 }
 
@@ -198,7 +228,11 @@ fun TimerScreenPreview() {
             onAddTodo = {},
             onToggleTodo = {},
             onDeleteTodo = {},
-            onBooksClick = {}
+            onBooksClick = {},
+            currentHealth = 3,
+            coinCount = 100,
+            onToggleMute = {},
+            isMuted = false,
 
         )
     }

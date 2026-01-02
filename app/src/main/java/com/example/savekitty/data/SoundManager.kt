@@ -6,6 +6,19 @@ import com.example.savekitty.R
 
 class SoundManager(private val context: Context) {
 
+    private var musicPlayer: MediaPlayer? = null
+    var isMuted = false
+
+    // --- SFX (One-shot sounds) ---
+    fun playSFX(resId: Int) {
+        if (isMuted) return
+        try {
+            val mp = MediaPlayer.create(context, resId)
+            mp.setOnCompletionListener { it.release() }
+            mp.start()
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
     fun playMeow() {
         playSound(R.raw.sfx_meow) // Make sure file name matches exactly!
     }
@@ -17,6 +30,9 @@ class SoundManager(private val context: Context) {
     fun playLevelUp() {
         playSound(R.raw.sfx_level_up)
     }
+    fun playDoorOpen() = playSFX(R.raw.sfx_door)
+    fun playNotebookFlip() = playSFX(R.raw.sfx_page_flip)
+    fun playButtonPress() = playSFX(R.raw.sfx_click)
 
     private fun playSound(resId: Int) {
         // Create and play a one-shot sound
@@ -25,5 +41,37 @@ class SoundManager(private val context: Context) {
             mp.release() // Clean up memory when done
         }
         mediaPlayer.start()
+    }
+    fun playMusic(resId: Int) {
+        if (isMuted) return
+
+        // Don't restart if already playing the same song
+        if (musicPlayer != null && musicPlayer!!.isPlaying) return
+
+        stopMusic() // Stop previous song if any
+
+        try {
+            musicPlayer = MediaPlayer.create(context, resId)
+            musicPlayer?.isLooping = true // Loop forever
+            musicPlayer?.setVolume(0.5f, 0.5f) // 50% volume so it's not too loud
+            musicPlayer?.start()
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    fun stopMusic() {
+        musicPlayer?.stop()
+        musicPlayer?.release()
+        musicPlayer = null
+    }
+
+    // --- TOGGLES ---
+    fun toggleMute() {
+        isMuted = !isMuted
+        if (isMuted) {
+            stopMusic()
+        } else {
+            // Resume theme music if unmuted (Optional: pass current screen logic here)
+            playMusic(R.raw.music_lofi_beat)
+        }
     }
 }

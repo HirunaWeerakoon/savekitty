@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.savekitty.presentation.GameOverlay
 import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
 
 @Composable
@@ -49,7 +50,9 @@ fun RoomScreen(
     onBuyFish: () -> Unit,
     onFeedCat: () -> Unit,
     onDoorClick: () -> Unit,
-    onCatClick: () -> Unit = {}
+    onCatClick: () -> Unit = {},
+    isMuted: Boolean,
+    onToggleMute: () -> Unit,
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
 
@@ -223,64 +226,6 @@ fun getPressColorFilter(isPressed: Boolean = false): ColorFilter? {
 }
 // In RoomScreen.kt
 
-@Composable
-fun GameOverlay(
-    health: Int,      // Scale: 0 to 10 (10 = 5 Hearts, 9 = 4.5 Hearts)
-    coinCount: Int
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .systemBarsPadding(), // Keeps it safe from status bars
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        // --- HEART SECTION ---
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            // We draw 5 hearts total
-            for (i in 1..5) {
-                // Math to decide which image to show:
-                // Full Heart Value: i * 2 (e.g., Heart 1 needs 2 health to be full)
-                // Half Heart Value: (i * 2) - 1
-
-                val imageRes = when {
-                    health >= i * 2 -> R.drawable.ic_heart_full      // Case: Completely Full
-                    health == (i * 2) - 1 -> R.drawable.ic_heart_half // Case: Half Full
-                    else -> R.drawable.ic_heart_empty                 // Case: Empty
-                }
-
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-        }
-
-        // --- COIN SECTION ---
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "$coinCount",
-                color = androidx.compose.ui.graphics.Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Image(
-                painter = painterResource(id = R.drawable.ic_biscuit),
-                contentDescription = "Coins",
-                modifier = Modifier.size(32.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
-    }
-}
 @Preview(showBackground = true)
 @Composable
 fun RoomScreenPreview() {
@@ -293,7 +238,9 @@ fun RoomScreenPreview() {
             coinCount = 100,
             fishCount = 0,
             onBuyFish = {},
-            onFeedCat = {}
+            onFeedCat = {},
+            isMuted = false,
+            onToggleMute = {}
 
         )
     }

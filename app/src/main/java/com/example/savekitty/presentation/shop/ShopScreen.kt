@@ -5,9 +5,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,13 +67,15 @@ fun ShopScreen(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Coins: $coinCount", color = Color.Yellow, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.width(4.dp))
             Image(
                 painter = painterResource(id = R.drawable.ic_biscuit),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("$coinCount", color = Color.Yellow, fontWeight = FontWeight.Bold)
+
+
         }
 
         // --- LAYER 3: SHELVES & ITEMS ---
@@ -107,14 +115,21 @@ fun ShopScreen(
         }
 
         // --- LAYER 4: EXIT BUTTON ---
-        Button(
+        IconButton(
             onClick = onBackClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(32.dp)
+                .padding(bottom = 32.dp)
+                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                .size(48.dp)
+
         ) {
-            Text("Exit Shop")
+            Image(
+                painter = painterResource(id = R.drawable.ic_back_arrow),
+                contentDescription = "Exit",
+                modifier = Modifier
+            )
+
         }
     }
 }

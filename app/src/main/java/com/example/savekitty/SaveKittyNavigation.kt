@@ -24,6 +24,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val timeLeft by viewModel.timeLeft.collectAsState()
     val isTimerRunning by viewModel.isTimerRunning.collectAsState()
     val todoList by viewModel.todoList.collectAsState()
+    val isMuted by viewModel.isMutedState.collectAsState()
 
     // 2. The Navigation Graph
     NavHost(
@@ -36,13 +37,20 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 currentHealth = health,
                 coinCount = coins,
                 fishCount = fish,
-                onBuyFish = { viewModel.buyFish() },
-                onFeedCat = { viewModel.consumeFish() },
+                isMuted = isMuted,
+                onToggleMute = { viewModel.toggleMute() },
+
+                // 🔊 PLAY SOUNDS ON CLICK
+                onDoorClick = {
+                    viewModel.playDoorSound() // <--- FIX: Play Sound!
+                    navController.navigate("shop")
+                },
                 onTableClick = {
-                    // Navigate to Timer
+                    viewModel.playClickSound() // <--- FIX: Play Sound!
                     navController.navigate("desk")
                 },
-                onDoorClick = { navController.navigate("shop") },
+                onBuyFish = { viewModel.buyFish() },
+                onFeedCat = { viewModel.consumeFish() },
                 onCatClick = { viewModel.onCatClick() }
             )
         }
@@ -51,12 +59,23 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 timeLeft = timeLeft,
                 isTimerRunning = isTimerRunning,
                 todoList = todoList, // <--- PASS DATA
+                currentHealth = health, // <--- NEW
+                coinCount = coins,      // <--- NEW
+
+                isMuted = isMuted,
+                onToggleMute = { viewModel.toggleMute() },
+
+                // 🔊 ACTIONS
                 onAddTodo = { viewModel.addTodo(it) },
-                onToggleTodo = { viewModel.toggleTodo(it) },
+                onToggleTodo = {
+                    viewModel.playClickSound()
+                    viewModel.toggleTodo(it)
+                },
                 onDeleteTodo = { viewModel.deleteTodo(it) },
                 onLaptopClick = { navController.navigate("laptop_zoom") },
                 onBackClick = { navController.popBackStack() },
-                onBooksClick = { navController.navigate("stats") }
+                onBooksClick = { navController.navigate("stats") },
+
             )
         }
         composable("laptop_zoom") {

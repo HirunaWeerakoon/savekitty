@@ -2,6 +2,7 @@ package com.example.savekitty.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.savekitty.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.savekitty.data.GameRepository
 import com.example.savekitty.data.SoundManager
@@ -9,7 +10,7 @@ import com.example.savekitty.data.TodoItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.savekitty.data.NotificationHelper
-
+import kotlinx.coroutines.flow.asStateFlow
 
 
 class GameViewModel : ViewModel() {
@@ -24,6 +25,9 @@ class GameViewModel : ViewModel() {
     val todoList = GameRepository.todoList
 
     val history = GameRepository.history
+
+    private val _isMuted = MutableStateFlow(false)
+    val isMutedState = _isMuted.asStateFlow()
 
     private var soundManager: SoundManager? = null
     private var notificationHelper: NotificationHelper? = null
@@ -70,6 +74,16 @@ class GameViewModel : ViewModel() {
     }
     fun setSoundManager(manager: SoundManager) {
         this.soundManager = manager
+        soundManager?.playMusic(R.raw.music_lofi_beat)
+        _isMuted.value = manager.isMuted
+    }
+    fun playDoorSound() = soundManager?.playDoorOpen()
+    fun playNotebookSound() = soundManager?.playNotebookFlip()
+    fun playClickSound() = soundManager?.playButtonPress()
+
+    fun toggleMute() {
+        soundManager?.toggleMute()
+        _isMuted.value = soundManager?.isMuted == true
     }
     fun setNotificationHelper(helper: NotificationHelper) { this.notificationHelper = helper }
 
@@ -112,5 +126,7 @@ class GameViewModel : ViewModel() {
 
     fun toggleTodo(id: Long) = GameRepository.toggleTodo(id)
     fun deleteTodo(id: Long) = GameRepository.deleteTodo(id)
+
+
 
 }
