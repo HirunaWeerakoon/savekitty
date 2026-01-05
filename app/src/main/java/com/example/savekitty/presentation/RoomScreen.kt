@@ -57,6 +57,15 @@ fun RoomScreen(
     onToggleMute: () -> Unit,
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
+    val fireFrames = listOf(
+        R.drawable.prop_fireplace_0,
+        R.drawable.prop_fireplace_1,
+        R.drawable.prop_fireplace_2,
+        R.drawable.prop_fireplace_3,
+        R.drawable.prop_fireplace_2,
+        R.drawable.prop_fireplace_1,
+        R.drawable.prop_fireplace_0,
+    )
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -76,6 +85,14 @@ fun RoomScreen(
         // --- LAYER 2: THE OBJECTS (Real Images) ---
         val doorSource = remember { MutableInteractionSource() }
         val isDoorPressed by doorSource.collectIsPressedAsState()
+        SpriteAnimation(
+            frames = fireFrames,
+            frameDurationMillis = 150, // Fast flicker
+            modifier = Modifier
+                .align(Alignment.BottomCenter) // Rough position
+                .offset(x = (-113).dp, y = (-280).dp) // <--- TWEAK THIS X/Y TO FIT YOUR ART
+                .size(140.dp) // <--- TWEAK SIZE
+        )
 
         // 🚪 DOOR
         Image(

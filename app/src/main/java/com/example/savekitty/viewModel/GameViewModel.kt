@@ -3,6 +3,7 @@ package com.example.savekitty.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.savekitty.R
+import com.example.savekitty.data.Food
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.savekitty.data.GameRepository
 import com.example.savekitty.data.SoundManager
@@ -25,6 +26,7 @@ class GameViewModel : ViewModel() {
     val todoList = GameRepository.todoList
 
     val history = GameRepository.history
+    val inventory = GameRepository.inventory
 
     private val _isMuted = MutableStateFlow(false)
     val isMutedState = _isMuted.asStateFlow()
@@ -127,6 +129,9 @@ class GameViewModel : ViewModel() {
     }
     fun toggleTodo(id: Long) = GameRepository.toggleTodo(id)
     fun deleteTodo(id: Long) = GameRepository.deleteTodo(id)
+
+    fun buyFood(food: Food) = GameRepository.buyFood(food)
+    fun eatFood(food: Food) = GameRepository.eatFood(food)
 
 
 

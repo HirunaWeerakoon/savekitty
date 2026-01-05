@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import kotlinx.coroutines.flow.first
 
 // A Singleton Repository that holds the "Truth" of the game state.
 // In a real app, this would save to a Database (Room) or DataStore.
@@ -40,6 +41,9 @@ object GameRepository {
     private val _history = MutableStateFlow<List<StudySession>>(emptyList())
     val history = _history.asStateFlow()
 
+    private val _inventory = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val inventory = _inventory.asStateFlow()
+
     fun initialize(context: Context) {
         storage = GameStorage(context)
 
@@ -62,16 +66,16 @@ object GameRepository {
         scope.launch {
             storage?.historyFlow?.collectLatest { _history.value = it }
         }
+        scope.launch { storage?.inventoryFlow?.collectLatest { _inventory.value = it } }
         // 2. NEW: CHECK FOR NEW DAY ☀️
         scope.launch {
             // Get the saved date
-            val lastDate = storage?.lastOpenDateFlow?.firstOrNull() ?: 0L
+            val storedList = storage?.todoListFlow?.first() ?: emptyList()
+            val lastDate = storage?.lastOpenDateFlow?.first() ?: 0L
             val today = System.currentTimeMillis()
 
             if (!isSameDay(lastDate, today)) {
-                // IT IS A NEW DAY! RESET DAILY TASKS
-                val currentList = _todoList.value
-                val resetList = currentList.map { item ->
+                val resetList = storedList.map { item ->
                     if (item.isDaily) {
                         item.copy(isDone = false) // Uncheck it!
                     } else {
@@ -183,5 +187,39 @@ object GameRepository {
         val cal2 = Calendar.getInstance().apply { timeInMillis = t2 }
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
+    fun buyFood(food: Food) {
+        if (spendBiscuits(food.price)) {
+            val currentCount = _inventory.value[food.id] ?: 0
+            val newInventory = _inventory.value.toMutableMap()
+            newInventory[food.id] = currentCount + 1
+
+            // Save
+            _inventory.value = newInventory
+            scope.launch { storage?.saveInventory(newInventory) }
+        }
+    }
+
+    fun eatFood(food: Food) {
+        val currentCount = _inventory.value[food.id] ?: 0
+
+        // Check if we have food AND health isn't full
+        if (currentCount > 0 && _health.value < 10) {
+            // 1. Remove 1 item
+            val newInventory = _inventory.value.toMutableMap()
+            newInventory[food.id] = currentCount - 1
+
+            // 2. Add Health (Don't go over 10)
+            val newHealth = (_health.value + food.healthPoints).coerceAtMost(10)
+
+            // 3. Save Both
+            _inventory.value = newInventory
+            _health.value = newHealth
+
+            scope.launch {
+                storage?.saveInventory(newInventory)
+                storage?.saveHealth(newHealth)
+            }
+        }
     }
 }

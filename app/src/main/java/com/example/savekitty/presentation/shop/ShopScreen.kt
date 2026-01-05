@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savekitty.R
+import com.example.savekitty.data.FoodMenu
 import com.example.savekitty.ui.theme.SaveKittyTheme
 
 @Composable
@@ -81,36 +83,21 @@ fun ShopScreen(
         // --- LAYER 3: SHELVES & ITEMS ---
         // We can place items manually using Offsets, just like the Room furniture
 
-        // 🐟 ITEM 1: FISH (5 Coins)
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center) // Place in middle of screen for now
-                .offset(y = (-50).dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+
+        androidx.compose.foundation.lazy.LazyRow(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            // The Item Image
-            Image(
-                // Use your shop specific image, or standard fish icon for now
-                painter = painterResource(id = R.drawable.ic_fish),
-                contentDescription = "Fish",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clickable {
-                        if (coinCount >= 5) {
-                            onBuyFish()
-                            Toast.makeText(context, "You bought a fish!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-            )
-            // The Price Tag
-            Box(
-                modifier = Modifier
-                    .background(Color.White, RoundedCornerShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-            ) {
-                Text("5 Coins", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            items(FoodMenu) { food ->
+                ShopItem(
+                    imageRes = food.imageRes,
+                    price = food.price,
+                    label = food.name,
+                    isBought = false, // Foods are consumables, never "Sold Out"
+                    canAfford = coinCount >= food.price,
+                    onClick = { onBuyFood(food) } // Need to update this callback!
+                )
             }
         }
 

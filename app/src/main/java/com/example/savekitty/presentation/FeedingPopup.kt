@@ -1,126 +1,124 @@
-package com.example.savekitty.ui
+package com.example.savekitty.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.savekitty.data.Food
+import com.example.savekitty.data.FoodMenu
 import com.example.savekitty.R
-import kotlin.math.roundToInt
 
 @Composable
 fun FeedingPopup(
-    fishCount: Int,
-    onFeed: () -> Unit,
-    onClose: () -> Unit,
-    onBuyFish: () -> Unit // Temporary way to buy fish inside the popup
+    inventory: Map<String, Int>,
+    onEat: (Food) -> Unit,
+    onClose: () -> Unit
 ) {
+    // START at Index 0 (Fish)
+    var currentIndex by remember { mutableIntStateOf(0) }
+    val currentFood = FoodMenu[currentIndex]
+    val ownedCount = inventory[currentFood.id] ?: 0
+
     Dialog(onDismissRequest = onClose) {
-        // The White Card Background
-        Box(
-            modifier = Modifier
-                .size(350.dp, 300.dp)
-                .background(Color.DarkGray, shape = RoundedCornerShape(16.dp))
-                .padding(16.dp)
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1))
         ) {
-            // Title
-            Text("Feed the Kitty!", color = Color.White, modifier = Modifier.align(Alignment.TopCenter))
-
-            // 1. THE STAGE (Row with Fish Stack and Cat Face)
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // LEFT SIDE: The Fish Stack 🐟
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("x$fishCount", color = Color.White, fontSize = 20.sp)
+                Text("FEED KITTY", fontSize = 20.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
-                    if (fishCount > 0) {
-                        DraggableFish(onDropOnTarget = onFeed)
-                    } else {
-                        // Show "Buy" button if empty
-                        Button(onClick = onBuyFish) {
-                            Text("Buy (5c)")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // --- SELECTION ROW ---
+                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    // LEFT SIDE: INFO
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(currentFood.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("Restores: ${currentFood.healthPoints / 2.0} ❤️", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF8D6E63), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text("Owned: $ownedCount", color = Color.White, fontSize = 14.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    // RIGHT SIDE: ARROWS & IMAGE
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // UP ARROW 🔼
+                        IconButton(
+                            onClick = {
+                                // Cycle BACKWARDS (Loop to end if at 0)
+                                currentIndex = if (currentIndex > 0) currentIndex - 1 else FoodMenu.lastIndex
+                            },
+                            modifier = Modifier.size(32.dp).background(Color.LightGray.copy(alpha=0.5f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.KeyboardArrowUp, null)
+                        }
+
+                        // FOOD IMAGE 🍎
+                        Image(
+                            painter = painterResource(id = currentFood.imageRes),
+                            contentDescription = currentFood.name,
+                            modifier = Modifier.size(64.dp)
+                        )
+
+                        // DOWN ARROW 🔽
+                        IconButton(
+                            onClick = {
+                                // Cycle FORWARDS (Loop to 0 if at end)
+                                currentIndex = (currentIndex + 1) % FoodMenu.size
+                            },
+                            modifier = Modifier.size(32.dp).background(Color.LightGray.copy(alpha=0.5f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.KeyboardArrowDown, null)
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // RIGHT SIDE: The Hungry Cat (Target Zone) 🐱
-                // We just show the head for feeding
-                Image(
-                    painter = painterResource(id = R.drawable.cat_hungry),
-                    contentDescription = "Cat Mouth",
-                    modifier = Modifier.size(100.dp)
-                )
+                // --- ACTION BUTTON ---
+                Button(
+                    onClick = {
+                        if (ownedCount > 0) onEat(currentFood)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (ownedCount > 0) Color(0xFF4CAF50) else Color.Gray
+                    ),
+                    enabled = ownedCount > 0
+                ) {
+                    Text(if (ownedCount > 0) "FEED NOW" else "OUT OF STOCK")
+                }
             }
         }
-    }
-}
-
-@Composable
-fun DraggableFish(onDropOnTarget: () -> Unit) {
-    // Current X/Y offset of the dragged fish
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
-
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragEnd = {
-                        // LOGIC: Did we drop it far enough to the right?
-                        // If dragged more than 300px to the right, consider it "Fed"
-                        if (offsetX > 200) {
-                            onDropOnTarget()
-                        }
-                        // Snap back to start
-                        offsetX = 0f
-                        offsetY = 0f
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        offsetX += dragAmount.x
-                        offsetY += dragAmount.y
-                    }
-                )
-            }
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_fish),
-            contentDescription = "Fish",
-            modifier = Modifier.size(64.dp)
-        )
     }
 }

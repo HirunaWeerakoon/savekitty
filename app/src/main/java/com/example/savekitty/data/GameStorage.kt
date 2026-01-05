@@ -24,6 +24,8 @@ class GameStorage(private val context: Context) {
         val KEY_FISH = intPreferencesKey("fish")
         val KEY_TODO_LIST = stringPreferencesKey("todo_list")
         val KEY_HISTORY = stringPreferencesKey("study_history")
+
+        val KEY_INVENTORY = stringPreferencesKey("food_inventory")
     }
 
     // --- READ DATA (Flows) ---
@@ -63,7 +65,23 @@ class GameStorage(private val context: Context) {
         .map { preferences ->
             preferences[KEY_LAST_OPEN_DATE] ?: 0L
         }
+    // --- READ INVENTORY (Map of ID -> Count) ---
+    val inventoryFlow: Flow<Map<String, Int>> = context.dataStore.data
+        .map { preferences ->
+            val json = preferences[KEY_INVENTORY] ?: ""
+            if (json.isEmpty()) {
+                // Default: 0 of everything
+                emptyMap()
+            } else {
+                val type = object : TypeToken<Map<String, Int>>() {}.type
+                gson.fromJson(json, type)
+            }
+        }
     // SAVE DATE
+    suspend fun saveInventory(inventory: Map<String, Int>) {
+        val json = gson.toJson(inventory)
+        context.dataStore.edit { it[KEY_INVENTORY] = json }
+    }
     suspend fun saveLastOpenDate(timestamp: Long) {
         context.dataStore.edit { preferences ->
             preferences[KEY_LAST_OPEN_DATE] = timestamp
