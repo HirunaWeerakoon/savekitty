@@ -3,6 +3,7 @@ package com.example.savekitty.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
@@ -36,6 +37,7 @@ class GameStorage(private val context: Context) {
     val fishFlow: Flow<Int> = context.dataStore.data
         .map { preferences -> preferences[KEY_FISH] ?: 0 }
 
+    val KEY_LAST_OPEN_DATE = longPreferencesKey("last_open_date")
     val todoListFlow: Flow<List<TodoItem>> = context.dataStore.data
         .map { preferences ->
             val json = preferences[KEY_TODO_LIST] ?: ""
@@ -57,6 +59,17 @@ class GameStorage(private val context: Context) {
                 gson.fromJson(json, type)
             }
         }
+    val lastOpenDateFlow: Flow<Long> = context.dataStore.data
+        .map { preferences ->
+            preferences[KEY_LAST_OPEN_DATE] ?: 0L
+        }
+    // SAVE DATE
+    suspend fun saveLastOpenDate(timestamp: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_LAST_OPEN_DATE] = timestamp
+        }
+    }
+
 
 
     // --- WRITE TODO LIST ---

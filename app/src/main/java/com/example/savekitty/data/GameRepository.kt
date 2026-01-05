@@ -7,7 +7,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 // A Singleton Repository that holds the "Truth" of the game state.
 // In a real app, this would save to a Database (Room) or DataStore.
@@ -59,6 +61,30 @@ object GameRepository {
         }
         scope.launch {
             storage?.historyFlow?.collectLatest { _history.value = it }
+        }
+        // 2. NEW: CHECK FOR NEW DAY ☀️
+        scope.launch {
+            // Get the saved date
+            val lastDate = storage?.lastOpenDateFlow?.firstOrNull() ?: 0L
+            val today = System.currentTimeMillis()
+
+            if (!isSameDay(lastDate, today)) {
+                // IT IS A NEW DAY! RESET DAILY TASKS
+                val currentList = _todoList.value
+                val resetList = currentList.map { item ->
+                    if (item.isDaily) {
+                        item.copy(isDone = false) // Uncheck it!
+                    } else {
+                        item // Leave long-term tasks alone
+                    }
+                }
+
+                // Save the changes
+                updateAndSaveTodo(resetList)
+
+                // Save "Today" as the new last open date
+                storage?.saveLastOpenDate(today)
+            }
         }
     }
 
@@ -115,7 +141,7 @@ object GameRepository {
             }
         }
     }
-    fun addTodo(text: String) {
+    fun addTodo(text: String,isDaily: Boolean) {
         if (text.isBlank()) return
         val newItem = TodoItem(
             text = text,
@@ -150,5 +176,12 @@ object GameRepository {
 
         _history.value = newList
         scope.launch { storage?.saveHistory(newList) }
+    }
+    // Helper to check if two timestamps are on the same calendar day
+    private fun isSameDay(t1: Long, t2: Long): Boolean {
+        val cal1 = Calendar.getInstance().apply { timeInMillis = t1 }
+        val cal2 = Calendar.getInstance().apply { timeInMillis = t2 }
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 }
