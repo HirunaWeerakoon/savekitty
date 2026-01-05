@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.savekitty.data.GameRepository.inventory
 import com.example.savekitty.presentation.shop.ShopScreen
 import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
@@ -37,6 +38,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 currentHealth = health,
                 coinCount = coins,
                 fishCount = fish,
+                inventory = inventory,
+                onEat = { food -> viewModel.eatFood(food) },
                 isMuted = isMuted,
                 onToggleMute = { viewModel.toggleMute() },
 
@@ -51,7 +54,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 },
                 onBuyFish = { viewModel.buyFish() },
                 onFeedCat = { viewModel.consumeFish() },
-                onCatClick = { viewModel.onCatClick() }
+                onCatClick = { viewModel.onCatClick() },
+
+
             )
         }
         composable("desk") {
@@ -91,9 +96,11 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         }
         composable("shop") {
             ShopScreen(
-                coinCount = coins,
-                onBuyFish = { viewModel.buyFish() },
-                onBackClick = { navController.popBackStack() }
+                coinCount = coins, // Use the variable you collected at the top
+                onBuyFood = { food ->
+                    viewModel.buyFood(food) // <--- Connect the wire!
+                },
+                onBackClick = { navController.popBackStack() },
             )
         }
 

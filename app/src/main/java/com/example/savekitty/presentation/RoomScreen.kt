@@ -21,7 +21,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.composed
-import com.example.savekitty.ui.FeedingPopup
+import com.example.savekitty.presentation.FeedingPopup
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.savekitty.data.Food
 import com.example.savekitty.presentation.GameOverlay
 import com.example.savekitty.presentation.MuteButton
 import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
@@ -55,6 +56,9 @@ fun RoomScreen(
     onCatClick: () -> Unit = {},
     isMuted: Boolean,
     onToggleMute: () -> Unit,
+    inventory: Map<String, Int>,
+    onEat: (Food) -> Unit
+
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
     val fireFrames = listOf(
@@ -198,15 +202,11 @@ fun RoomScreen(
         )
         // --- LAYER 5: POPUPS ---
         if (showFeedingPopup) {
+            // 2. UPDATED POPUP CALL
             FeedingPopup(
-                fishCount = fishCount,
-                onFeed = {
-                    onFeedCat()
-                    // Optional: Close popup after feeding?
-                    // showFeedingPopup = false
-                },
-                onClose = { showFeedingPopup = false },
-                onBuyFish = onBuyFish
+                inventory = inventory, // Pass the Map
+                onEat = { food -> onEat(food) }, // Pass the action
+                onClose = { showFeedingPopup = false }
             )
         }
     }
@@ -266,7 +266,9 @@ fun RoomScreenPreview() {
             onBuyFish = {},
             onFeedCat = {},
             isMuted = false,
-            onToggleMute = {}
+            onToggleMute = {},
+            inventory = emptyMap(),
+            onEat = {}
 
         )
     }

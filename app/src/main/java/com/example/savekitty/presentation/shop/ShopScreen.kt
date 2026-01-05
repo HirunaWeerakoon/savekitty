@@ -29,13 +29,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.savekitty.R
+import com.example.savekitty.data.Food
 import com.example.savekitty.data.FoodMenu
 import com.example.savekitty.ui.theme.SaveKittyTheme
 
 @Composable
 fun ShopScreen(
     coinCount: Int,
-    onBuyFish: () -> Unit,
+    onBuyFood: (Food) -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -94,9 +95,8 @@ fun ShopScreen(
                     imageRes = food.imageRes,
                     price = food.price,
                     label = food.name,
-                    isBought = false, // Foods are consumables, never "Sold Out"
                     canAfford = coinCount >= food.price,
-                    onClick = { onBuyFood(food) } // Need to update this callback!
+                    onClick = { onBuyFood(food) } // Now this works!
                 )
             }
         }
@@ -120,14 +120,52 @@ fun ShopScreen(
         }
     }
 }
+@Composable
+fun ShopItem(
+    imageRes: Int,
+    price: Int,
+    label: String,
+    canAfford: Boolean,
+    onClick: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(contentAlignment = Alignment.BottomEnd) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = label,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clickable(enabled = canAfford) { onClick() }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Price Tag
+        Box(
+            modifier = Modifier
+                .background(if (canAfford) Color.White else Color.Gray, RoundedCornerShape(4.dp))
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = "$price",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                color = if (canAfford) Color.Black else Color.DarkGray
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun ShopScreenPreview() {
     SaveKittyTheme {
         ShopScreen(
             coinCount = 100,
-            onBuyFish = {},
-            onBackClick = {}
+            onBackClick = {},
+            onBuyFood = {}
         )
     }
 }
