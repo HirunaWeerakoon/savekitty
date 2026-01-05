@@ -49,7 +49,7 @@ fun TimerScreen(
     timeLeft: Int,
     isTimerRunning: Boolean,
     todoList: List<TodoItem>, // <--- NEW
-    onAddTodo: (String) -> Unit, // <--- NEW
+    onAddTodo: (String, Boolean) -> Unit, // <--- NEW
     onToggleTodo: (Long) -> Unit, // <--- NEW
     onDeleteTodo: (Long) -> Unit, // <--- NEW
     currentHealth: Int, // <--- Add this
@@ -59,6 +59,7 @@ fun TimerScreen(
     onBackClick: () -> Unit,
     onBooksClick: () -> Unit,
     isMuted: Boolean,
+    onPlayPageTurn: () -> Unit,
 
 ) {
     var showNotebook by remember { mutableStateOf(false) }
@@ -130,7 +131,11 @@ fun TimerScreen(
             modifier = Modifier
                 .offset(x = screenWidth * 0.22f, y = screenHeight * 0.7f)
                 .size(screenWidth * 0.4f)
-                .pixelClickable(imageBitmap = notebookBitmap) { showNotebook = true }
+                .pixelClickable(imageBitmap = notebookBitmap) {
+                    onPlayPageTurn()
+                    showNotebook = true
+                }
+
         )
 
         // --- LAYER 5: THE LAPTOP 💻 ---
@@ -221,7 +226,6 @@ fun TimerScreenPreview() {
             onLaptopClick = {},
             onBackClick = {},
             todoList = emptyList(),
-            onAddTodo = {},
             onToggleTodo = {},
             onDeleteTodo = {},
             onBooksClick = {},
@@ -229,6 +233,8 @@ fun TimerScreenPreview() {
             coinCount = 100,
             onToggleMute = {},
             isMuted = false,
+            onPlayPageTurn = {},
+            onAddTodo = { _, _ -> }
 
         )
     }

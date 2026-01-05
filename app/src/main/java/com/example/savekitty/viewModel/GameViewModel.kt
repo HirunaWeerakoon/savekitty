@@ -122,8 +122,9 @@ class GameViewModel : ViewModel() {
             println("Meow notification sent!")
         }
     }
-    fun addTodo(text: String) = GameRepository.addTodo(text)
-
+    fun addTodo(text: String, isDaily: Boolean) {
+        GameRepository.addTodo(text, isDaily)
+    }
     fun toggleTodo(id: Long) = GameRepository.toggleTodo(id)
     fun deleteTodo(id: Long) = GameRepository.deleteTodo(id)
 

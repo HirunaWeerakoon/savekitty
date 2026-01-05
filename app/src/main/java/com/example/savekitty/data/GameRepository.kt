@@ -117,9 +117,11 @@ object GameRepository {
     }
     fun addTodo(text: String) {
         if (text.isBlank()) return
-        val newItem = TodoItem(text = text)
+        val newItem = TodoItem(
+            text = text,
+            isDaily = isDaily
+        )
         val newList = _todoList.value + newItem
-
         updateAndSaveTodo(newList)
     }
 

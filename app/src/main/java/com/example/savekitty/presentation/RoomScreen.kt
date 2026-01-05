@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -172,6 +173,7 @@ fun RoomScreen(
             coinCount = coinCount,
             modifier = Modifier.align(Alignment.TopEnd)
         )
+
         MuteButton(
             isMuted = isMuted,
             onToggle = onToggleMute,

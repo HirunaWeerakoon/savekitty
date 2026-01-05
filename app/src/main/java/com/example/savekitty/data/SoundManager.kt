@@ -53,7 +53,7 @@ class SoundManager(private val context: Context) {
         try {
             musicPlayer = MediaPlayer.create(context, resId)
             musicPlayer?.isLooping = true // Loop forever
-            musicPlayer?.setVolume(0.5f, 0.5f) // 50% volume so it's not too loud
+            musicPlayer?.setVolume(1f, 1f) // 50% volume so it's not too loud
             musicPlayer?.start()
         } catch (e: Exception) { e.printStackTrace() }
     }

@@ -66,7 +66,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onToggleMute = { viewModel.toggleMute() },
 
                 // 🔊 ACTIONS
-                onAddTodo = { viewModel.addTodo(it) },
+                onAddTodo = { text, isDaily ->
+                    viewModel.addTodo(text, isDaily) },
                 onToggleTodo = {
                     viewModel.playClickSound()
                     viewModel.toggleTodo(it)
@@ -75,6 +76,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onLaptopClick = { navController.navigate("laptop_zoom") },
                 onBackClick = { navController.popBackStack() },
                 onBooksClick = { navController.navigate("stats") },
+                onPlayPageTurn = { viewModel.playNotebookSound() },
 
             )
         }
