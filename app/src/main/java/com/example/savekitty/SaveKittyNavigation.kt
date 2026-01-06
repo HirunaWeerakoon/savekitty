@@ -1,12 +1,15 @@
 package com.example.savekitty
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.savekitty.data.GameRepository.inventory
 import com.example.savekitty.presentation.shop.ShopScreen
 import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
@@ -26,6 +29,22 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val isTimerRunning by viewModel.isTimerRunning.collectAsState()
     val todoList by viewModel.todoList.collectAsState()
     val isMuted by viewModel.isMutedState.collectAsState()
+    val inventory by viewModel.inventory.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> viewModel.onAppPause()
+                Lifecycle.Event.ON_RESUME -> viewModel.onAppResume()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // 2. The Navigation Graph
     NavHost(

@@ -74,4 +74,16 @@ class SoundManager(private val context: Context) {
             playMusic(R.raw.music_lofi_beat)
         }
     }
+    fun pauseMusic() {
+        if (musicPlayer?.isPlaying == true) {
+            musicPlayer?.pause()
+        }
+    }
+
+    fun resumeMusic() {
+        // Only resume if we are NOT muted and the player exists
+        if (!isMuted && musicPlayer != null) {
+            musicPlayer?.start()
+        }
+    }
 }

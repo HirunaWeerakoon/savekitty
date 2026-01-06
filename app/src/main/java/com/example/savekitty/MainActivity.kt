@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.savekitty.data.GameRepository
 import com.example.savekitty.data.NotificationHelper
 import com.example.savekitty.data.SoundManager
 import com.example.savekitty.ui.RoomScreen
@@ -39,8 +40,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val repository = GameRepository
+        repository.initialize(this)
         soundManager = SoundManager(this)
         notificationHelper = NotificationHelper(this)
+        val viewModel = GameViewModel()
         viewModel.setSoundManager(soundManager)
         viewModel.setNotificationHelper(notificationHelper)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

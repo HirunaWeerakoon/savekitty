@@ -26,6 +26,7 @@ class GameStorage(private val context: Context) {
         val KEY_HISTORY = stringPreferencesKey("study_history")
 
         val KEY_INVENTORY = stringPreferencesKey("food_inventory")
+        val KEY_LAST_HEALTH_TIME = longPreferencesKey("last_health_time")
     }
 
     // --- READ DATA (Flows) ---
@@ -87,6 +88,13 @@ class GameStorage(private val context: Context) {
             preferences[KEY_LAST_OPEN_DATE] = timestamp
         }
     }
+    val lastHealthTimeFlow: Flow<Long> = context.dataStore.data
+        .map { it[KEY_LAST_HEALTH_TIME] ?: System.currentTimeMillis()
+        }
+    suspend fun saveLastHealthTime(timestamp: Long) {
+        context.dataStore.edit { it[KEY_LAST_HEALTH_TIME] = timestamp }
+    }
+
 
 
 

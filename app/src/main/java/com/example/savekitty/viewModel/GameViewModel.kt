@@ -133,6 +133,13 @@ class GameViewModel : ViewModel() {
     fun buyFood(food: Food) = GameRepository.buyFood(food)
     fun eatFood(food: Food) = GameRepository.eatFood(food)
 
+    fun onAppPause() {
+        soundManager?.pauseMusic()
+    }
+
+    fun onAppResume() {
+        soundManager?.resumeMusic()
+    }
 
 
 }
