@@ -68,11 +68,20 @@ object GameRepository {
         }
         scope.launch {
             // Wait for data to load
-            val lastTime = storage?.lastHealthTimeFlow?.first() ?: System.currentTimeMillis()
-            val currentHealth = storage?.healthFlow?.first() ?: 5 // Default 5 hearts (10 pts)
+            val lastTime = storage?.lastHealthTimeFlow?.first() ?: 0L
+            val currentHealth = _health.value
+
 
             val currentTime = System.currentTimeMillis()
+            if (lastTime == 0L) {
+                storage?.saveLastHealthTime(currentTime)
+                return@launch
+            }
             val diffMillis = currentTime - lastTime
+            if (diffMillis < 0) {
+                storage?.saveLastHealthTime(currentTime)
+                return@launch
+            }
 
             // Convert to Hours
             val hoursPassed = diffMillis / (1000 * 60 * 60)
@@ -81,16 +90,14 @@ object GameRepository {
             val healthToLose = (hoursPassed / 6).toInt()
 
             if (healthToLose > 0) {
-                // Calculate new health (Don't go below 0)
+                val currentHealth = storage?.healthFlow?.first() ?: 5
                 val newHealth = (currentHealth - healthToLose).coerceAtLeast(0)
 
-                // Save updates
+                // Save Health
                 _health.value = newHealth
                 storage?.saveHealth(newHealth)
 
-                // Update the "Last Checked Time"
-                // IMPORTANT: We subtract the 'remainder' time so we don't cheat the user.
-                // If 7 hours passed, we deduct for 6, but keep the 1 extra hour counting for later.
+                // Save Time: Deduct the hours we used, keep the remainder
                 val timeAccountedFor = healthToLose * 6 * 60 * 60 * 1000L
                 storage?.saveLastHealthTime(lastTime + timeAccountedFor)
             } else {

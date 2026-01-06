@@ -12,6 +12,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.savekitty.data.NotificationHelper
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.ExistingWorkPolicy
+import java.util.concurrent.TimeUnit
+import com.example.savekitty.data.NotificationWorker
+import android.content.Context
 
 
 class GameViewModel : ViewModel() {
@@ -27,6 +33,7 @@ class GameViewModel : ViewModel() {
 
     val history = GameRepository.history
     val inventory = GameRepository.inventory
+    private var appContext: Context? = null
 
     private val _isMuted = MutableStateFlow(false)
     val isMutedState = _isMuted.asStateFlow()
@@ -66,6 +73,9 @@ class GameViewModel : ViewModel() {
                 }
             }
         }
+    }
+    fun setContext(context: Context) {
+        this.appContext = context.applicationContext
     }
     fun toggleTimer() = GameRepository.toggleTimer()
     fun setTimer(m: Int) = GameRepository.setTimer(m)
@@ -114,14 +124,9 @@ class GameViewModel : ViewModel() {
     }
     fun onAppBackgrounded() {
         viewModelScope.launch {
-            // Wait 10 seconds (change to 600000 for 10 minutes later)
-            delay(10_000)
+            soundManager?.pauseMusic()
+            scheduleNotification()
 
-            // Send the notification
-            notificationHelper?.showMeowNotification()
-
-            // Optional: Log it so you know it ran
-            println("Meow notification sent!")
         }
     }
     fun addTodo(text: String, isDaily: Boolean) {
@@ -139,7 +144,31 @@ class GameViewModel : ViewModel() {
 
     fun onAppResume() {
         soundManager?.resumeMusic()
+        cancelNotification()
     }
+    private fun scheduleNotification() {
+        val context = appContext ?: return
+
+        // 1. Create a request to run the Worker in 24 HOURS
+        val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(10, TimeUnit.SECONDS) // <--- CHANGE THIS TO 10, TimeUnit.SECONDS TO TEST!
+            .addTag("meow_reminder") // Give it a name tag so we can find it later
+            .build()
+
+        // 2. Enqueue it (REPLACE ensures we don't have duplicate timers)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "meow_reminder_work",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+    }
+    private fun cancelNotification() {
+        val context = appContext ?: return
+        // User came back! Cancel the pending notification.
+        WorkManager.getInstance(context).cancelAllWorkByTag("meow_reminder")
+    }
+
+
 
 
 }

@@ -76,5 +76,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.google.gson)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
 }

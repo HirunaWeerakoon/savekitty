@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
         val viewModel = GameViewModel()
         viewModel.setSoundManager(soundManager)
         viewModel.setNotificationHelper(notificationHelper)
+        viewModel.setContext(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -60,8 +61,11 @@ class MainActivity : ComponentActivity() {
     }
     override fun onStop() {
         super.onStop()
-        // The user just left the app! Start the countdown.
         viewModel.onAppBackgrounded()
+    }
+    override fun onStart() {
+        super.onStart()
+        viewModel.onAppResume()
     }
 }
 

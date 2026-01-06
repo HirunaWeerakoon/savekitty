@@ -89,7 +89,7 @@ class GameStorage(private val context: Context) {
         }
     }
     val lastHealthTimeFlow: Flow<Long> = context.dataStore.data
-        .map { it[KEY_LAST_HEALTH_TIME] ?: System.currentTimeMillis()
+        .map { it[KEY_LAST_HEALTH_TIME] ?: 0L
         }
     suspend fun saveLastHealthTime(timestamp: Long) {
         context.dataStore.edit { it[KEY_LAST_HEALTH_TIME] = timestamp }
