@@ -36,6 +36,7 @@ import com.example.savekitty.data.TodoItem
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.graphics.ImageBitmap
@@ -159,14 +160,17 @@ fun TimerScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .offset(y = (-10).dp),
+                    .offset(x = 35.dp)
+                    .rotate(7f)
+                    .offset(y = (-27).dp),
+
                 contentAlignment = Alignment.Center
             ) {
                 val minutes = timeLeft / 60
                 val seconds = timeLeft % 60
                 Text(
                     text = "%02d:%02d".format(minutes, seconds),
-                    color = Color(0xFF00FF00), // Hacker Green
+                    color = Color(0xFF000000), // Hacker Green
                     fontFamily = FontFamily.Monospace, // Pixel Font
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold

@@ -18,6 +18,8 @@ import androidx.work.ExistingWorkPolicy
 import java.util.concurrent.TimeUnit
 import com.example.savekitty.data.NotificationWorker
 import android.content.Context
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 
 
 class GameViewModel : ViewModel() {
@@ -27,8 +29,8 @@ class GameViewModel : ViewModel() {
     val health = GameRepository.health
     val biscuits = GameRepository.biscuits
     val fishCount = GameRepository.fishCount
-    val timeLeft = GameRepository.timeLeft
-    val isTimerRunning = GameRepository.isTimerRunning
+
+
     val todoList = GameRepository.todoList
 
     val history = GameRepository.history
@@ -47,6 +49,17 @@ class GameViewModel : ViewModel() {
     )
 
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
+
+    private val _timeLeft = MutableStateFlow(25 * 60) // Default 25 min
+    val timeLeft: StateFlow<Int> = _timeLeft.asStateFlow()
+
+    private val _isTimerRunning = MutableStateFlow(false)
+    val isTimerRunning: StateFlow<Boolean> = _isTimerRunning.asStateFlow()
+
+    // New: Remember what the user last picked so we can reset to it
+    private var lastSelectedTime = 25 * 60
+
+    private var timerJob: Job? = null
 
 
 
@@ -77,7 +90,49 @@ class GameViewModel : ViewModel() {
     fun setContext(context: Context) {
         this.appContext = context.applicationContext
     }
-    fun toggleTimer() = GameRepository.toggleTimer()
+    fun setTime(seconds: Int) {
+        // Only allow changing time if timer is NOT running
+        if (!_isTimerRunning.value) {
+            _timeLeft.value = seconds
+            lastSelectedTime = seconds // Remember this!
+        }
+    }
+
+    fun toggleTimer() {
+        // ERROR FIX: Access .value to check the boolean
+        if (_isTimerRunning.value) {
+            stopTimer()
+        } else {
+            startTimer()
+        }
+    }
+
+    // Helper: Start the Countdown
+    private fun startTimer() {
+        // Prevent multiple timers
+        if (timerJob?.isActive == true) return
+
+        _isTimerRunning.value = true
+
+        // Launch a coroutine on the ViewModel's scope
+        timerJob = viewModelScope.launch {
+            while (_timeLeft.value > 0 && _isTimerRunning.value) {
+                delay(1000L) // Wait 1 second
+                _timeLeft.value -= 1 // Decrease time
+            }
+            // When loop finishes (time hits 0), stop cleanly
+            if (_timeLeft.value == 0) {
+                stopTimer()
+            }
+        }
+    }
+
+    // Helper: Stop and Reset
+    private fun stopTimer() {
+        timerJob?.cancel() // Kill the coroutine
+        _isTimerRunning.value = false
+        _timeLeft.value = lastSelectedTime // RESET logic: Go back to 25m or 50m
+    }
     fun setTimer(m: Int) = GameRepository.setTimer(m)
 
     // 2. Actions (Delegate to Repository)
@@ -98,6 +153,7 @@ class GameViewModel : ViewModel() {
         _isMuted.value = soundManager?.isMuted == true
     }
     fun setNotificationHelper(helper: NotificationHelper) { this.notificationHelper = helper }
+
 
     fun buyFish() {
         // We check if the purchase was successful first
@@ -151,7 +207,7 @@ class GameViewModel : ViewModel() {
 
         // 1. Create a request to run the Worker in 24 HOURS
         val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-            .setInitialDelay(10, TimeUnit.SECONDS) // <--- CHANGE THIS TO 10, TimeUnit.SECONDS TO TEST!
+            .setInitialDelay(24, TimeUnit.HOURS) // <--- CHANGE THIS TO 10, TimeUnit.SECONDS TO TEST!
             .addTag("meow_reminder") // Give it a name tag so we can find it later
             .build()
 

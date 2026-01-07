@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         repository.initialize(this)
         soundManager = SoundManager(this)
         notificationHelper = NotificationHelper(this)
-        val viewModel = GameViewModel()
+
         viewModel.setSoundManager(soundManager)
         viewModel.setNotificationHelper(notificationHelper)
         viewModel.setContext(this)

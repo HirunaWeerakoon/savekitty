@@ -110,7 +110,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 isTimerRunning = isTimerRunning,
                 onToggleTimer = { viewModel.toggleTimer() },
                 onSetTime = { minutes -> viewModel.setTimer(minutes) },
-                onBackClick = { navController.popBackStack() } // Back to Desk
+                onBackClick = { navController.popBackStack() } // Back to Desk,
+
+
             )
         }
         composable("shop") {
