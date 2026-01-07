@@ -44,6 +44,20 @@ object GameRepository {
     private val _inventory = MutableStateFlow<Map<String, Int>>(emptyMap())
     val inventory = _inventory.asStateFlow()
 
+    private val _catName = MutableStateFlow("Kitty")
+    val catName = _catName.asStateFlow()
+
+    private val _catSkin = MutableStateFlow(0) // 0 = Orange, 1 = Black, etc.
+    val catSkin = _catSkin.asStateFlow()
+
+    // Store IDs of cats that have "passed away" so they can't be picked again
+    private val _deceasedCats = MutableStateFlow<Set<Int>>(emptySet())
+    val deceasedCats = _deceasedCats.asStateFlow()
+
+    // Track if it's the very first launch for the Tutorial
+    private val _isFirstRun = MutableStateFlow(true)
+    val isFirstRun = _isFirstRun.asStateFlow()
+
     fun initialize(context: Context) {
         storage = GameStorage(context)
 
@@ -65,6 +79,18 @@ object GameRepository {
         }
         scope.launch {
             storage?.historyFlow?.collectLatest { _history.value = it }
+        }
+        scope.launch {
+            storage?.catNameFlow?.collectLatest { _catName.value = it }
+        }
+        scope.launch {
+            storage?.catSkinFlow?.collectLatest { _catSkin.value = it }
+        }
+        scope.launch {
+            storage?.deceasedCatsFlow?.collectLatest { _deceasedCats.value = it }
+        }
+        scope.launch {
+            storage?.isFirstRunFlow?.collectLatest { _isFirstRun.value = it }
         }
         scope.launch {
             // Wait for data to load
@@ -134,7 +160,40 @@ object GameRepository {
 
     }
 
+
     // 2. ACTIONS
+    fun setCatIdentity(name: String, skinId: Int) {
+        _catName.value = name
+        _catSkin.value = skinId
+        _isFirstRun.value = false // Tutorial/Setup done
+
+        scope.launch {
+            storage?.saveCatIdentity(name, skinId)
+            storage?.saveFirstRun(false)
+        }
+    }
+
+    fun handleGameOver() {
+        // 1. Mark current cat as deceased
+        val currentSkin = _catSkin.value
+        val newDeceasedSet = _deceasedCats.value + currentSkin
+
+        _deceasedCats.value = newDeceasedSet
+        scope.launch { storage?.saveDeceasedCats(newDeceasedSet) }
+
+        // 2. Reset Game State (Punishment)
+        _health.value = 5
+        _biscuits.value = 0 // Lost all money
+        _fishCount.value = 0
+        _inventory.value = emptyMap() // Lost items
+
+        scope.launch {
+            storage?.saveHealth(5)
+            storage?.saveBiscuits(0)
+            storage?.saveFish(0)
+            storage?.saveInventory(emptyMap())
+        }
+    }
     fun toggleTimer() {
         _isTimerRunning.value = !_isTimerRunning.value
     }

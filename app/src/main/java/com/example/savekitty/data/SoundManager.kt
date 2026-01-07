@@ -86,4 +86,11 @@ class SoundManager(private val context: Context) {
             musicPlayer?.start()
         }
     }
+    fun playPurr() {
+        playSFX(R.raw.sfx_purr)
+    }
+
+    fun playEat() {
+        playSFX(R.raw.sfx_eat)
+    }
 }

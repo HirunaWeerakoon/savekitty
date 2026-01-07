@@ -53,7 +53,7 @@ fun RoomScreen(
     onBuyFish: () -> Unit,
     onFeedCat: () -> Unit,
     onDoorClick: () -> Unit,
-    onCatClick: () -> Unit = {},
+    onCatClick: (Boolean) -> Unit,
     isMuted: Boolean,
     onToggleMute: () -> Unit,
     inventory: Map<String, Int>,
@@ -61,6 +61,7 @@ fun RoomScreen(
 
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
+    val isHappy = currentHealth > 4
     val fireFrames = listOf(
         R.drawable.prop_fireplace_0,
         R.drawable.prop_fireplace_1,
@@ -187,7 +188,7 @@ fun RoomScreen(
                 .offset(x = catX, y = catY)
                 // Use the dynamic variables we created above
                 .size(width = currentWidth, height = currentHeight)
-                .gameClick(interactionSource = catSource) { onCatClick() }
+                .gameClick(interactionSource = catSource) { onCatClick(isHappy) }
         )
         GameOverlay(
             health = currentHealth,

@@ -73,7 +73,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 },
                 onBuyFish = { viewModel.buyFish() },
                 onFeedCat = { viewModel.consumeFish() },
-                onCatClick = { viewModel.onCatClick() },
+                onCatClick = { isSleeping ->
+                    viewModel.onCatClick(isSleeping)
+                },
 
 
             )
@@ -109,7 +111,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 timeLeft = timeLeft,
                 isTimerRunning = isTimerRunning,
                 onToggleTimer = { viewModel.toggleTimer() },
-                onSetTime = { minutes -> viewModel.setTimer(minutes) },
+                onSetTime = { minutes -> viewModel.setTime(minutes) },
                 onBackClick = { navController.popBackStack() } // Back to Desk,
 
 
