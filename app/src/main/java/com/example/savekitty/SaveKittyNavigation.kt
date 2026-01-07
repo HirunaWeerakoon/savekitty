@@ -10,6 +10,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.savekitty.presentation.CatSelectionScreen
+import com.example.savekitty.presentation.HospitalDialog
 import com.example.savekitty.presentation.shop.ShopScreen
 import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
@@ -30,6 +32,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val todoList by viewModel.todoList.collectAsState()
     val isMuted by viewModel.isMutedState.collectAsState()
     val inventory by viewModel.inventory.collectAsState()
+    val isFirstRun by viewModel.isFirstRun.collectAsState()
+    val deceasedCats by viewModel.deceasedCats.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -45,12 +49,33 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
+    val startDest = if (isFirstRun || health == 0) "setup" else "room"
 
     // 2. The Navigation Graph
     NavHost(
         navController = navController,
         startDestination = "room"
     ) {
+        composable("setup") {
+            // Check if we need to show the "Hospital" dialog (Cat died)
+            if (health == 0 && !isFirstRun) {
+                HospitalDialog(
+                    onConfirm = {
+                        viewModel.handleGameOver() // Resets health to 5
+                    }
+                )
+            }
+
+            CatSelectionScreen(
+                deceasedCats = deceasedCats,
+                onCatSelected = { name, skin ->
+                    viewModel.setCatIdentity(name, skin)
+                    navController.navigate("room") {
+                        popUpTo("setup") { inclusive = true } // Clear history
+                    }
+                }
+            )
+        }
         // 🏠 SCREEN 1: THE ROOM
         composable("room") {
             RoomScreen(

@@ -51,6 +51,9 @@ class GameViewModel : ViewModel() {
 
     private var timerJob: Job? = null
 
+    val isFirstRun = GameRepository.isFirstRun
+    val deceasedCats = GameRepository.deceasedCats
+
     // --- TIMER LOGIC ---
 
     fun setTime(seconds: Int) {
@@ -193,6 +196,13 @@ class GameViewModel : ViewModel() {
         soundManager?.resumeMusic()
         cancelNotification()
     }
+    fun setCatIdentity(name: String, skin: Int) {
+        GameRepository.setCatIdentity(name, skin)
+    }
+
+    fun handleGameOver() {
+        GameRepository.handleGameOver()
+    }
 
     // --- TODO & DATA ---
 
@@ -225,4 +235,5 @@ class GameViewModel : ViewModel() {
         val context = appContext ?: return
         WorkManager.getInstance(context).cancelAllWorkByTag("meow_reminder")
     }
+
 }
