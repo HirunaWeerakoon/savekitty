@@ -54,7 +54,7 @@ class GameStorage(private val context: Context) {
     }
     val isFirstRunFlow: Flow<Boolean> = context.dataStore.data.map { it[KEY_IS_FIRST_RUN] ?: true }
 
-    val KEY_LAST_OPEN_DATE = longPreferencesKey("last_open_date")
+
     val todoListFlow: Flow<List<TodoItem>> = context.dataStore.data
         .map { preferences ->
             val json = preferences[KEY_TODO_LIST] ?: ""

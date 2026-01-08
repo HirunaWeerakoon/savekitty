@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -43,6 +44,9 @@ import com.example.savekitty.data.Food
 import com.example.savekitty.presentation.GameOverlay
 import com.example.savekitty.presentation.MuteButton
 import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 
 @Composable
 fun RoomScreen(
@@ -57,7 +61,8 @@ fun RoomScreen(
     isMuted: Boolean,
     onToggleMute: () -> Unit,
     inventory: Map<String, Int>,
-    onEat: (Food) -> Unit
+    onEat: (Food) -> Unit,
+    onStatsClick: () -> Unit
 
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
@@ -152,6 +157,7 @@ fun RoomScreen(
         )
 
 
+
         // --- LAYER 3: THE KITTY 🐱 ---
 
         val isHappy = currentHealth > 4
@@ -199,8 +205,16 @@ fun RoomScreen(
         MuteButton(
             isMuted = isMuted,
             onToggle = onToggleMute,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        SmallFloatingActionButton(
+            onClick = onStatsClick,
+            containerColor = Color(0xFFF8F8E9), // Cream
+            contentColor = Color(0xFF2E3333)    // Dark Grey
+        ) {
+            Icon(Icons.Default.DateRange, contentDescription = "Stats")
+        }
         // --- LAYER 5: POPUPS ---
         if (showFeedingPopup) {
             // 2. UPDATED POPUP CALL
@@ -269,7 +283,8 @@ fun RoomScreenPreview() {
             isMuted = false,
             onToggleMute = {},
             inventory = emptyMap(),
-            onEat = {}
+            onEat = {},
+            onStatsClick = {}
 
         )
     }

@@ -153,23 +153,25 @@ class GameViewModel : ViewModel() {
 
     fun consumeFish() = GameRepository.eatFish()
 
-    fun onCatClick() {
+    fun onCatClick(isSleeping: Boolean) {
         GameRepository.earnBiscuits(1)
         if (isSleeping) {
             // SLEEPING: Purr + Vibrate
             soundManager?.playPurr()
-            vibratePhone()
+            vibratePhone(3000)
         } else {
             // HUNGRY: Meow only
             soundManager?.playMeow()
         }
     }
-    private fun vibratePhone() {
+    private fun vibratePhone(durationMs: Long) {
         val vibrator = appContext?.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
         if (android.os.Build.VERSION.SDK_INT >= 26) {
-            vibrator?.vibrate(android.os.VibrationEffect.createOneShot(100, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            // Use the duration here
+            vibrator?.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
-            vibrator?.vibrate(100)
+            // Use the duration here
+            vibrator?.vibrate(durationMs)
         }
     }
 

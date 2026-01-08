@@ -34,6 +34,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val inventory by viewModel.inventory.collectAsState()
     val isFirstRun by viewModel.isFirstRun.collectAsState()
     val deceasedCats by viewModel.deceasedCats.collectAsState()
+    val history by viewModel.history.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -54,7 +55,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     // 2. The Navigation Graph
     NavHost(
         navController = navController,
-        startDestination = "room"
+        startDestination = startDest
     ) {
         composable("setup") {
             // Check if we need to show the "Hospital" dialog (Cat died)
@@ -101,6 +102,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onCatClick = { isSleeping ->
                     viewModel.onCatClick(isSleeping)
                 },
+                onStatsClick = { navController.navigate("stats") },
 
 
             )
@@ -153,7 +155,6 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         }
 
         composable("stats") {
-            val history by viewModel.history.collectAsState()
 
             StatsScreen(
                 history = history,
