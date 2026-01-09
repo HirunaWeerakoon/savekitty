@@ -58,6 +58,9 @@ object GameRepository {
     private val _isFirstRun = MutableStateFlow(true)
     val isFirstRun = _isFirstRun.asStateFlow()
 
+    private val _placedItems = MutableStateFlow<Map<DecorationType, String>>(emptyMap())
+    val placedItems = _placedItems.asStateFlow()
+
     fun initialize(context: Context) {
         storage = GameStorage(context)
 
@@ -156,6 +159,9 @@ object GameRepository {
                 // Save "Today" as the new last open date
                 storage?.saveLastOpenDate(today)
             }
+        }
+        scope.launch {
+            storage?.placedItemsFlow?.collectLatest { _placedItems.value = it }
         }
 
     }
@@ -321,6 +327,38 @@ object GameRepository {
                 storage?.saveInventory(newInventory)
                 storage?.saveHealth(newHealth)
             }
+        }
+    }
+    // --- DECORATION ACTIONS ---
+
+    // 1. BUY ITEM
+    fun buyDecoration(item: Decoration) {
+        // Check if we already own it (Count > 0)
+        val ownedCount = _inventory.value[item.id] ?: 0
+        if (ownedCount == 0) {
+            if (spendBiscuits(item.price)) {
+                // Add to inventory
+                val newInventory = _inventory.value.toMutableMap()
+                newInventory[item.id] = 1
+
+                _inventory.value = newInventory
+                scope.launch { storage?.saveInventory(newInventory) }
+            }
+        }
+    }
+
+    // 2. EQUIP ITEM (The Slot System)
+    fun equipDecoration(item: Decoration) {
+        // Verify ownership
+        if ((_inventory.value[item.id] ?: 0) > 0) {
+            val currentPlaced = _placedItems.value.toMutableMap()
+
+            // MAGIC: This replaces whatever was in that slot before!
+            // If CLOCK slot had "analog", now it has "digital".
+            currentPlaced[item.type] = item.id
+
+            _placedItems.value = currentPlaced
+            scope.launch { storage?.savePlacedItems(currentPlaced) }
         }
     }
 }

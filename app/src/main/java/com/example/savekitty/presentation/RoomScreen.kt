@@ -47,6 +47,8 @@ import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
+import com.example.savekitty.data.DecorationType
+import com.example.savekitty.data.ItemCatalog
 
 @Composable
 fun RoomScreen(
@@ -62,7 +64,9 @@ fun RoomScreen(
     onToggleMute: () -> Unit,
     inventory: Map<String, Int>,
     onEat: (Food) -> Unit,
-    onStatsClick: () -> Unit
+    onStatsClick: () -> Unit,
+    placedItems: Map<DecorationType, String>,
+    onEquipDemo: (DecorationType) -> Unit
 
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
@@ -90,6 +94,21 @@ fun RoomScreen(
             contentDescription = null,
             contentScale = ContentScale.FillBounds, // Stretches to fit any phone perfectly
             modifier = Modifier.fillMaxSize()
+        )
+        // --- LAYER 2: DECORATIONS (Behind objects) ---
+
+        // [CLOCK SLOT] - Placed relative to the fireplace
+        // Fireplace is at BottomCenter offset(-113, -280).
+        // We calculate Clock position relative to that or screen.
+        // Let's place it at roughly x=0.25, y=0.35 (Adjust as needed)
+        DecorationSlot(
+            type = DecorationType.CLOCK,
+            placedItems = placedItems,
+            modifier = Modifier
+                .align(Alignment.TopCenter) // Align relative to screen center
+                .offset(x = (-100).dp, y = (220).dp) // Tweak these to sit above fireplace
+                .size(60.dp)
+                .clickable { onEquipDemo(DecorationType.CLOCK) } // CLICK TO CYCLE CLOCKS (TESTING)
         )
 
         // --- LAYER 2: THE OBJECTS (Real Images) ---
@@ -155,6 +174,20 @@ fun RoomScreen(
                     showFeedingPopup = true
                 }
         )
+        // 5. CALENDAR (New!) 🗓️
+        val calendarSource = remember { MutableInteractionSource() }
+        val isCalendarPressed by calendarSource.collectIsPressedAsState()
+        Image(
+            painter = painterResource(id = R.drawable.prop_calendar), // <--- MAKE SURE YOU HAVE THIS FILE
+            contentDescription = "Stats",
+            contentScale = ContentScale.Fit,
+            colorFilter = getPressColorFilter(isCalendarPressed),
+            modifier = Modifier
+                // Position: Adjust these to place it on your wall
+                .offset(x = screenWidth * 0.293f, y = screenHeight * 0.227f)
+                .size(90.dp) // Adjust size as needed
+                .gameClick(interactionSource = calendarSource) { onStatsClick() }
+        )
 
 
 
@@ -207,14 +240,7 @@ fun RoomScreen(
             onToggle = onToggleMute,
             modifier = Modifier
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        SmallFloatingActionButton(
-            onClick = onStatsClick,
-            containerColor = Color(0xFFF8F8E9), // Cream
-            contentColor = Color(0xFF2E3333)    // Dark Grey
-        ) {
-            Icon(Icons.Default.DateRange, contentDescription = "Stats")
-        }
+
         // --- LAYER 5: POPUPS ---
         if (showFeedingPopup) {
             // 2. UPDATED POPUP CALL
@@ -265,6 +291,32 @@ fun getPressColorFilter(isPressed: Boolean = false): ColorFilter? {
     ))
     return ColorFilter.colorMatrix(matrix)
 }
+@Composable
+fun DecorationSlot(
+    type: DecorationType,
+    placedItems: Map<DecorationType, String>,
+    modifier: Modifier = Modifier
+) {
+    // 1. Check if we have an item ID for this slot (e.g., "clock_analog")
+    val itemId = placedItems[type]
+
+    if (itemId != null) {
+        // 2. Look up the Resource ID from the Catalog
+        val itemConfig = ItemCatalog.getById(itemId)
+
+        if (itemConfig != null) {
+            Image(
+                painter = painterResource(id = itemConfig.imageRes),
+                contentDescription = itemConfig.name,
+                contentScale = ContentScale.Fit,
+                modifier = modifier
+            )
+        }
+    } else {
+        // Optional: Render an empty placeholder if debugging
+        // Box(modifier = modifier.border(1.dp, Color.Red))
+    }
+}
 // In RoomScreen.kt
 
 @Preview(showBackground = true)
@@ -284,7 +336,9 @@ fun RoomScreenPreview() {
             onToggleMute = {},
             inventory = emptyMap(),
             onEat = {},
-            onStatsClick = {}
+            onStatsClick = {},
+            placedItems = emptyMap(),
+            onEquipDemo = {}
 
         )
     }

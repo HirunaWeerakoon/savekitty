@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.map
+import com.example.savekitty.data.DecorationType
 
 // Create the DataStore file (like a mini database)
 private val Context.dataStore by preferencesDataStore(name = "savekitty_data")
@@ -34,6 +35,7 @@ class GameStorage(private val context: Context) {
         val KEY_DECEASED_CATS = stringSetPreferencesKey("deceased_cats") // Stores IDs of dead cats
         val KEY_IS_FIRST_RUN = booleanPreferencesKey("is_first_run")
         val KEY_LAST_OPEN_DATE = longPreferencesKey("last_open_date")
+        val KEY_PLACED_ITEMS = stringPreferencesKey("placed_items")
     }
 
     // --- READ DATA (Flows) ---
@@ -92,6 +94,17 @@ class GameStorage(private val context: Context) {
                 gson.fromJson(json, type)
             }
         }
+    val placedItemsFlow: Flow<Map<DecorationType, String>> = context.dataStore.data
+        .map { preferences ->
+            val json = preferences[KEY_PLACED_ITEMS] ?: ""
+            if (json.isEmpty()) {
+                emptyMap()
+            } else {
+                // Use Gson to parse the JSON back into a Map
+                val typeToken = object : TypeToken<Map<DecorationType, String>>() {}.type
+                gson.fromJson(json, typeToken)
+            }
+        }
     // SAVE DATE
     suspend fun saveInventory(inventory: Map<String, Int>) {
         val json = gson.toJson(inventory)
@@ -131,12 +144,17 @@ class GameStorage(private val context: Context) {
 
 
 
+
     // --- WRITE TODO LIST ---
     suspend fun saveTodoList(list: List<TodoItem>) {
         val json = gson.toJson(list) // Convert List to JSON String
         context.dataStore.edit { it[KEY_TODO_LIST] = json }
     }
 
+    suspend fun savePlacedItems(items: Map<DecorationType, String>) {
+        val json = gson.toJson(items)
+        context.dataStore.edit { it[KEY_PLACED_ITEMS] = json }
+    }
     // --- WRITE DATA (Suspend Functions) ---
     suspend fun saveBiscuits(amount: Int) {
         context.dataStore.edit { it[KEY_BISCUITS] = amount }

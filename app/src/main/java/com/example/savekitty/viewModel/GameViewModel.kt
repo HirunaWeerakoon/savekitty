@@ -7,6 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.savekitty.R
+import com.example.savekitty.data.Decoration
 import com.example.savekitty.data.Food
 import com.example.savekitty.data.GameRepository
 import com.example.savekitty.data.NotificationHelper
@@ -53,6 +54,7 @@ class GameViewModel : ViewModel() {
 
     val isFirstRun = GameRepository.isFirstRun
     val deceasedCats = GameRepository.deceasedCats
+    val placedItems = GameRepository.placedItems
 
     // --- TIMER LOGIC ---
 
@@ -237,5 +239,7 @@ class GameViewModel : ViewModel() {
         val context = appContext ?: return
         WorkManager.getInstance(context).cancelAllWorkByTag("meow_reminder")
     }
+    fun buyDecoration(item: Decoration) = GameRepository.buyDecoration(item)
+    fun equipDecoration(item: Decoration) = GameRepository.equipDecoration(item)
 
 }
