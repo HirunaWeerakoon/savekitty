@@ -55,6 +55,7 @@ class GameViewModel : ViewModel() {
     val isFirstRun = GameRepository.isFirstRun
     val deceasedCats = GameRepository.deceasedCats
     val placedItems = GameRepository.placedItems
+    // In GameViewModel class
 
     // --- TIMER LOGIC ---
 

@@ -12,12 +12,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.savekitty.presentation.CatSelectionScreen
 import com.example.savekitty.presentation.HospitalDialog
+import com.example.savekitty.presentation.OutsideScreen
 import com.example.savekitty.presentation.shop.ShopScreen
 import com.example.savekitty.presentation.timer.LaptopScreen
 import com.example.savekitty.presentation.timer.TimerScreen
 import com.example.savekitty.ui.RoomScreen
 import com.example.savekitty.viewModel.GameViewModel
 import com.example.savekitty.presentation.StatsScreen
+import com.example.savekitty.presentation.shop.FurnitureShopScreen
 
 @Composable
 fun SaveKittyNavigation(viewModel: GameViewModel) {
@@ -51,6 +53,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         }
     }
     val startDest = if (isFirstRun || health == 0) "setup" else "room"
+    val placedItems by viewModel.placedItems.collectAsState()
 
     // 2. The Navigation Graph
     NavHost(
@@ -87,11 +90,12 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onEat = { food -> viewModel.eatFood(food) },
                 isMuted = isMuted,
                 onToggleMute = { viewModel.toggleMute() },
+                placedItems = placedItems,
 
                 // 🔊 PLAY SOUNDS ON CLICK
                 onDoorClick = {
                     viewModel.playDoorSound() // <--- FIX: Play Sound!
-                    navController.navigate("shop")
+                    navController.navigate("outside")
                 },
                 onTableClick = {
                     viewModel.playClickSound() // <--- FIX: Play Sound!
@@ -103,6 +107,19 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                     viewModel.onCatClick(isSleeping)
                 },
                 onStatsClick = { navController.navigate("stats") },
+                onEquipDemo = { type ->
+                    // Logic: Find the next item of this type and equip it
+                    // This is just for testing!
+                    val allItems =
+                        com.example.savekitty.data.ItemCatalog.decorations.filter { it.type == type }
+                    if (allItems.isNotEmpty()) {
+                        // Pick random or cycle
+                        val randomItem = allItems.random()
+                        viewModel.equipDecoration(randomItem)
+                        // Hack: Give free biscuits to buy it instantly for demo
+                        viewModel.buyDecoration(randomItem)
+                    }
+                }
 
 
             )
@@ -144,6 +161,17 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
 
             )
         }
+        composable("outside") {
+            OutsideScreen(
+                onFoodShopClick = {
+                    navController.navigate("shop")
+                },
+                onFurnitureShopClick = {
+                    navController.navigate("furniture_shop")
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
         composable("shop") {
             ShopScreen(
                 coinCount = coins, // Use the variable you collected at the top
@@ -151,6 +179,16 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                     viewModel.buyFood(food) // <--- Connect the wire!
                 },
                 onBackClick = { navController.popBackStack() },
+            )
+        }
+        composable("furniture_shop") {
+            FurnitureShopScreen(
+                coinCount = coins,
+                inventory = inventory,
+                placedItems = placedItems,
+                onBuy = { item -> viewModel.buyDecoration(item) },
+                onEquip = { item -> viewModel.equipDecoration(item) },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
