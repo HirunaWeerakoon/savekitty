@@ -50,6 +50,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
 import com.example.savekitty.data.DecorationType
 import com.example.savekitty.data.ItemCatalog
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun RoomScreen(
@@ -68,6 +74,7 @@ fun RoomScreen(
     onStatsClick: () -> Unit,
     placedItems: Map<DecorationType, String>,
     onEquipDemo: (DecorationType) -> Unit
+
 
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
@@ -233,7 +240,8 @@ fun RoomScreen(
         GameOverlay(
             health = currentHealth,
             coinCount = coinCount,
-            modifier = Modifier.align(Alignment.TopEnd)
+            modifier = Modifier.align(Alignment.TopEnd),
+            onWatchAd = { onWatchAd() }
         )
 
         MuteButton(

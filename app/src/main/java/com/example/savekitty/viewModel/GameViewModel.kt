@@ -243,4 +243,11 @@ class GameViewModel : ViewModel() {
     fun buyDecoration(item: Decoration) = GameRepository.buyDecoration(item)
     fun equipDecoration(item: Decoration) = GameRepository.equipDecoration(item)
 
+    fun earnAdReward() {
+        // In a real app, you'd trigger the Ad SDK here.
+        // For now, we give the reward immediately.
+        GameRepository.earnBiscuits(5)
+        soundManager?.playChing() // Play the "money" sound
+    }
+
 }

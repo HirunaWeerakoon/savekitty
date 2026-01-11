@@ -118,7 +118,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                         viewModel.buyDecoration(randomItem)
                         viewModel.equipDecoration(randomItem)
                     }
-                }
+                } ,
+                onWatchAd = { viewModel.earnAdReward() }
 
 
             )
@@ -146,6 +147,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 onBackClick = { navController.popBackStack() },
                 onBooksClick = { navController.navigate("stats") },
                 onPlayPageTurn = { viewModel.playNotebookSound() },
+                onWatchAd = { viewModel.earnAdReward() }
 
             )
         }

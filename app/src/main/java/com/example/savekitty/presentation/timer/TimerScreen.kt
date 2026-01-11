@@ -208,7 +208,8 @@ fun TimerScreen(
         GameOverlay(
             health = currentHealth,
             coinCount = coinCount,
-            modifier = Modifier.align(Alignment.TopCenter)
+            modifier = Modifier.align(Alignment.TopCenter),
+            onWatchAd = { onWatchAd() }
         )
 
         // 2. The Mute Button (Top Left)
