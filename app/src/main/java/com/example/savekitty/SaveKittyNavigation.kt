@@ -115,9 +115,8 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                     if (allItems.isNotEmpty()) {
                         // Pick random or cycle
                         val randomItem = allItems.random()
-                        viewModel.equipDecoration(randomItem)
-                        // Hack: Give free biscuits to buy it instantly for demo
                         viewModel.buyDecoration(randomItem)
+                        viewModel.equipDecoration(randomItem)
                     }
                 }
 

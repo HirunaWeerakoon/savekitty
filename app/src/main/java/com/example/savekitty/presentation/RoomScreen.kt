@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -106,8 +107,8 @@ fun RoomScreen(
             placedItems = placedItems,
             modifier = Modifier
                 .align(Alignment.TopCenter) // Align relative to screen center
-                .offset(x = (-100).dp, y = (220).dp) // Tweak these to sit above fireplace
-                .size(60.dp)
+                .offset(x = (-118).dp, y = (268).dp) // Tweak these to sit above fireplace
+                .size(160.dp)
                 .clickable { onEquipDemo(DecorationType.CLOCK) } // CLICK TO CYCLE CLOCKS (TESTING)
         )
 
@@ -297,24 +298,26 @@ fun DecorationSlot(
     placedItems: Map<DecorationType, String>,
     modifier: Modifier = Modifier
 ) {
-    // 1. Check if we have an item ID for this slot (e.g., "clock_analog")
+    // 1. Check if we have an item ID for this slot
     val itemId = placedItems[type]
+    val itemConfig = if (itemId != null) ItemCatalog.getById(itemId) else null
 
-    if (itemId != null) {
-        // 2. Look up the Resource ID from the Catalog
-        val itemConfig = ItemCatalog.getById(itemId)
-
+    // 2. Always render a Box so the modifier (size/click) is applied
+    Box(
+        modifier = modifier, // Now the click listener and size work!
+        contentAlignment = Alignment.Center
+    ) {
         if (itemConfig != null) {
             Image(
                 painter = painterResource(id = itemConfig.imageRes),
                 contentDescription = itemConfig.name,
                 contentScale = ContentScale.Fit,
-                modifier = modifier
+                modifier = Modifier.fillMaxSize()
             )
+        } else {
+            // Optional: Uncomment to see the touch target for debugging
+            // Spacer(modifier = Modifier.fillMaxSize().border(1.dp, Color.Red))
         }
-    } else {
-        // Optional: Render an empty placeholder if debugging
-        // Box(modifier = modifier.border(1.dp, Color.Red))
     }
 }
 // In RoomScreen.kt
@@ -337,7 +340,7 @@ fun RoomScreenPreview() {
             inventory = emptyMap(),
             onEat = {},
             onStatsClick = {},
-            placedItems = emptyMap(),
+            placedItems = mapOf(com.example.savekitty.data.DecorationType.CLOCK to "clock_digital"),
             onEquipDemo = {}
 
         )

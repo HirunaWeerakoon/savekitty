@@ -23,8 +23,8 @@ data class Decoration(
 object ItemCatalog {
     val decorations = listOf(
         // --- CLOCKS (Slot: Above Fireplace) ---
-        Decoration("clock_analog", "Classic Clock", 50, R.drawable.prop_clock_analog, DecorationType.CLOCK),
-        Decoration("clock_digital", "Digital Clock", 150, R.drawable.prop_clock_digital, DecorationType.CLOCK),
+        Decoration("clock_analog", "Classic Clock", 10, R.drawable.prop_clock_analog, DecorationType.CLOCK),
+        Decoration("clock_digital", "Digital Clock", 10, R.drawable.prop_clock_digital, DecorationType.CLOCK),
         //Decoration("clock_cat", "Kitty Clock", 300, R.drawable.prop_clock_cat, DecorationType.CLOCK),
 
         // --- RUGS (Slot: Floor) ---
