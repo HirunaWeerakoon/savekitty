@@ -73,7 +73,8 @@ fun RoomScreen(
     onEat: (Food) -> Unit,
     onStatsClick: () -> Unit,
     placedItems: Map<DecorationType, String>,
-    onEquipDemo: (DecorationType) -> Unit
+    onEquipDemo: (DecorationType) -> Unit,
+    onWatchAd: () -> Unit
 
 
 ) {
@@ -113,10 +114,56 @@ fun RoomScreen(
             type = DecorationType.CLOCK,
             placedItems = placedItems,
             modifier = Modifier
-                .align(Alignment.TopCenter) // Align relative to screen center
-                .offset(x = (-118).dp, y = (268).dp) // Tweak these to sit above fireplace
-                .size(160.dp)
-                .clickable { onEquipDemo(DecorationType.CLOCK) } // CLICK TO CYCLE CLOCKS (TESTING)
+                .offset(
+                    x = screenWidth * 0f, // <--- TWEAK THIS (Horizontal Position)
+                    y = screenHeight * 0.315f // <--- TWEAK THIS (Vertical Position)
+                )
+                .size(screenWidth * 0.4f) // Size relative to screen width
+
+        )
+        DecorationSlot(
+            type = DecorationType.TOP_SHELF,
+            placedItems = placedItems,
+            modifier = Modifier
+                .offset(
+                    x = screenWidth * 0.51f, // <--- TWEAK THIS (Horizontal Position)
+                    y = screenHeight * 0.105f // <--- TWEAK THIS (Vertical Position)
+                )
+                .size(screenWidth * 0.335f) // Size relative to screen width
+                .clickable { onEquipDemo(DecorationType.TOP_SHELF) }
+        )
+        DecorationSlot(
+            type = DecorationType.SMALL_SHELF,
+            placedItems = placedItems,
+            modifier = Modifier
+                .offset(
+                    x = screenWidth * 0.21f, // <--- TWEAK THIS (Horizontal Position)
+                    y = screenHeight * 0.4f // <--- TWEAK THIS (Vertical Position)
+                )
+                .size(screenWidth * 0.48f) // Size relative to screen width
+
+        )
+        DecorationSlot(
+            type = DecorationType.BIG_SHELF,
+            placedItems = placedItems,
+            modifier = Modifier
+                .offset(
+                    x = screenWidth * 0.68f, // <--- TWEAK THIS (Horizontal Position)
+                    y = screenHeight * 0.27f // <--- TWEAK THIS (Vertical Position)
+                )
+                .size(screenWidth * 0.49f) // Size relative to screen width
+
+        )
+        DecorationSlot(
+            type = DecorationType.SOFA,
+            placedItems = placedItems,
+            modifier = Modifier
+                .offset(
+                    x = screenWidth * 0.8f, // <--- TWEAK THIS (Horizontal Position)
+                    y = screenHeight * 0.27f // <--- TWEAK THIS (Vertical Position)
+                )
+                .size(screenWidth * 0.49f) // Size relative to screen width
+
         )
 
         // --- LAYER 2: THE OBJECTS (Real Images) ---
@@ -124,11 +171,13 @@ fun RoomScreen(
         val isDoorPressed by doorSource.collectIsPressedAsState()
         SpriteAnimation(
             frames = fireFrames,
-            frameDurationMillis = 150, // Fast flicker
+            frameDurationMillis = 150,
             modifier = Modifier
-                .align(Alignment.BottomCenter) // Rough position
-                .offset(x = (-113).dp, y = (-280).dp) // <--- TWEAK THIS X/Y TO FIT YOUR ART
-                .size(140.dp) // <--- TWEAK SIZE
+                .offset(
+                    x = screenWidth * 0.048f, // <--- TWEAK THIS
+                    y = screenHeight * 0.5f  // <--- TWEAK THIS
+                )
+                .size(screenWidth * 0.35f) // Size relative to width
         )
 
         // 🚪 DOOR
@@ -186,14 +235,13 @@ fun RoomScreen(
         val calendarSource = remember { MutableInteractionSource() }
         val isCalendarPressed by calendarSource.collectIsPressedAsState()
         Image(
-            painter = painterResource(id = R.drawable.prop_calendar), // <--- MAKE SURE YOU HAVE THIS FILE
+            painter = painterResource(id = R.drawable.prop_calendar),
             contentDescription = "Stats",
             contentScale = ContentScale.Fit,
             colorFilter = getPressColorFilter(isCalendarPressed),
             modifier = Modifier
-                // Position: Adjust these to place it on your wall
                 .offset(x = screenWidth * 0.293f, y = screenHeight * 0.227f)
-                .size(90.dp) // Adjust size as needed
+                .size(screenWidth * 0.22f) // Fixed: Changed from 90.dp to percentage
                 .gameClick(interactionSource = calendarSource) { onStatsClick() }
         )
 
@@ -247,8 +295,7 @@ fun RoomScreen(
         MuteButton(
             isMuted = isMuted,
             onToggle = onToggleMute,
-            modifier = Modifier
-        )
+            modifier = Modifier.align(Alignment.TopStart)        )
 
         // --- LAYER 5: POPUPS ---
         if (showFeedingPopup) {
@@ -348,8 +395,9 @@ fun RoomScreenPreview() {
             inventory = emptyMap(),
             onEat = {},
             onStatsClick = {},
-            placedItems = mapOf(com.example.savekitty.data.DecorationType.CLOCK to "clock_digital"),
-            onEquipDemo = {}
+            placedItems = mapOf(com.example.savekitty.data.DecorationType.BIG_SHELF to "big_shelf_1"),
+            onEquipDemo = {},
+            onWatchAd = {}
 
         )
     }

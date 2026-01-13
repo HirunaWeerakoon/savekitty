@@ -195,3 +195,23 @@ fun InfoPopup(
         }
     }
 }
+@Composable
+fun HealthBar(health: Int, maxHealth: Int = 10) {
+    Row(modifier = Modifier.padding(8.dp)) {
+        // We display 5 hearts. Each heart represents 2 health points.
+        repeat(5) { index ->
+            val heartValue = (index + 1) * 2
+            val resource = when {
+                health >= heartValue -> R.drawable.ic_heart_full
+                health >= heartValue - 1 -> R.drawable.ic_heart_half
+                else -> R.drawable.ic_heart_empty
+            }
+
+            Image(
+                painter = painterResource(id = resource),
+                contentDescription = "Heart",
+                modifier = Modifier.size(24.dp).padding(end = 4.dp)
+            )
+        }
+    }
+}

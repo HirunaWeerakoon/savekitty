@@ -13,6 +13,7 @@ fun SpriteAnimation(
     frameDurationMillis: Long = 150,
     modifier: Modifier = Modifier
 ) {
+    if (frames.isEmpty()) return
     var currentFrame by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {

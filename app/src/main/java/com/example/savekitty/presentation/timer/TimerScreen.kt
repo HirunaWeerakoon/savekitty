@@ -44,6 +44,8 @@ import com.example.savekitty.presentation.timer.NotebookDialog
 import com.example.savekitty.presentation.pixelClickable
 import com.example.savekitty.presentation.GameOverlay
 import com.example.savekitty.presentation.MuteButton
+import com.example.savekitty.presentation.SpriteAnimation.SpriteAnimation
+import androidx.compose.ui.platform.LocalInspectionMode
 
 @Composable
 fun TimerScreen(
@@ -61,10 +63,22 @@ fun TimerScreen(
     onBooksClick: () -> Unit,
     isMuted: Boolean,
     onPlayPageTurn: () -> Unit,
+    onWatchAd: () -> Unit
 
 ) {
     var showNotebook by remember { mutableStateOf(false) }
 
+    val rainFrames = listOf(
+        R.drawable.rain_frame_1,
+        R.drawable.rain_frame_2,
+        R.drawable.rain_frame_3,
+        R.drawable.rain_frame_4,
+        R.drawable.rain_frame_5,
+        R.drawable.rain_frame_4,
+        R.drawable.rain_frame_3,
+        R.drawable.rain_frame_2,
+
+    )
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
             .background(Color.Black)
@@ -73,9 +87,29 @@ fun TimerScreen(
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
-        val notebookBitmap = ImageBitmap.imageResource(id = R.drawable.prop_notebook)
-        val booksBitmap = ImageBitmap.imageResource(id = R.drawable.prop_books)
+        val isPreview = LocalInspectionMode.current
+        val notebookBitmap = if (isPreview) {
+            ImageBitmap(1, 1)
+        } else {
+            ImageBitmap.imageResource(id = R.drawable.prop_notebook)
+        }
 
+        val booksBitmap = if (isPreview) {
+            ImageBitmap(1, 1)
+        } else {
+            ImageBitmap.imageResource(id = R.drawable.prop_books)
+        }
+
+        SpriteAnimation(
+            frames = rainFrames,
+            frameDurationMillis = 150,
+            modifier = Modifier
+                .offset(
+                    x = screenWidth * 0.1f, // <--- TWEAK THIS
+                    y = screenHeight * (-0.05f)  // <--- TWEAK THIS
+                )
+                .size(screenWidth * 0.85f) // Size relative to width
+        )
         // --- LAYER 1: BACKGROUND (The Desk) ---
         Image(
             painter = painterResource(id = R.drawable.bg_desk), // Make sure you have this!
@@ -91,7 +125,7 @@ fun TimerScreen(
             contentDescription = "Lamp",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .offset(x = screenWidth * (-0.104f), y = screenHeight * 0.55f) // Adjust these!
+                .offset(x = screenWidth * (-0.104f), y = screenHeight * 0.35f) // Adjust these!
                 .size(screenWidth * 0.5f)
                 .clickable {
                     isLampOn = !isLampOn
@@ -117,8 +151,8 @@ fun TimerScreen(
             contentDescription = "Cat",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .offset(x = screenWidth * 0.253f, y = screenHeight * 0.581f) // Slightly above books
-                .size(screenWidth * 0.3f)
+                .offset(x = screenWidth * 0.253f, y = screenHeight * 0.281f) // Slightly above books
+                .size(screenWidth * 0.4f)
                 .clickable {
                     // TODO: Play Meow Sound
                 }
@@ -130,7 +164,7 @@ fun TimerScreen(
             contentDescription = "Notebook",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .offset(x = screenWidth * 0.22f, y = screenHeight * 0.7f)
+                .offset(x = screenWidth * 0.22f, y = screenHeight * 0.55f)
                 .size(screenWidth * 0.4f)
                 .pixelClickable(imageBitmap = notebookBitmap) {
                     onPlayPageTurn()
@@ -143,8 +177,8 @@ fun TimerScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(y = screenHeight * 0.2f,x=screenWidth*0.3f) // Move down a bit
-                .size(screenWidth * 0.45f, screenWidth * 0.4125f) // Adjust aspect ratio
+                .offset(y = screenHeight * 0f,x=screenWidth*0.2f) // Move down a bit
+                .size(screenWidth * 0.58f, screenWidth * 0.55f) // Adjust aspect ratio
                 .clickable { onLaptopClick() } // <--- NAVIGATE TO ZOOM
         ) {
             // A. The Laptop Body (Frame)
@@ -221,7 +255,7 @@ fun TimerScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true,widthDp = 1080, heightDp = 2400)
 @Composable
 fun TimerScreenPreview() {
     SaveKittyTheme {
@@ -239,7 +273,8 @@ fun TimerScreenPreview() {
             onToggleMute = {},
             isMuted = false,
             onPlayPageTurn = {},
-            onAddTodo = { _, _ -> }
+            onAddTodo = { _, _ -> },
+            onWatchAd = {}
 
         )
     }
