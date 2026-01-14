@@ -82,7 +82,8 @@ fun RoomScreen(
     onWatchAd: () -> Unit,
     catSkinId: Int,
     isFirstRun: Boolean,
-    onTutorialFinished: () -> Unit
+    onTutorialFinished: () -> Unit,
+    isTimerRunning: Boolean
 
 
 ) {
@@ -99,7 +100,7 @@ fun RoomScreen(
     )
     val catState = when {
         currentHealth <= 4 -> CatState.HUNGRY
-        isTimerRunning -> CatState.SIT // Or STUDY mode
+        isTimerRunning -> CatState.SIT
         else -> CatState.SLEEP
     }
     val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
@@ -265,6 +266,7 @@ fun RoomScreen(
 
         val isHappy = currentHealth > 4
         val catImage = if (isHappy) R.drawable.cat_sleep else R.drawable.cat_hungry
+        val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
 
         // 1. CONFIGURE SIZES SEPARATELY 📏
         // -------------------------------------------------
