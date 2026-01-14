@@ -106,7 +106,7 @@ fun TimerScreen(
             modifier = Modifier
                 .offset(
                     x = screenWidth * 0.1f, // <--- TWEAK THIS
-                    y = screenHeight * (-0.05f)  // <--- TWEAK THIS
+                    y = screenHeight * (-0.048f)  // <--- TWEAK THIS
                 )
                 .size(screenWidth * 0.9f) // Size relative to width
         )

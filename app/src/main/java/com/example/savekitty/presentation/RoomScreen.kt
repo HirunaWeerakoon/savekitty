@@ -56,6 +56,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
+import com.example.savekitty.data.GameRepository.isFirstRun
+import com.example.savekitty.data.GameRepository.isTimerRunning
+import com.example.savekitty.presentation.CatSkinManager
+import com.example.savekitty.presentation.CatState
+import com.example.savekitty.presentation.TutorialOverlay
 
 @Composable
 fun RoomScreen(
@@ -74,7 +79,10 @@ fun RoomScreen(
     onStatsClick: () -> Unit,
     placedItems: Map<DecorationType, String>,
     onEquipDemo: (DecorationType) -> Unit,
-    onWatchAd: () -> Unit
+    onWatchAd: () -> Unit,
+    catSkinId: Int,
+    isFirstRun: Boolean,
+    onTutorialFinished: () -> Unit
 
 
 ) {
@@ -89,6 +97,12 @@ fun RoomScreen(
         R.drawable.prop_fireplace_1,
         R.drawable.prop_fireplace_0,
     )
+    val catState = when {
+        currentHealth <= 4 -> CatState.HUNGRY
+        isTimerRunning -> CatState.SIT // Or STUDY mode
+        else -> CatState.SLEEP
+    }
+    val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -275,7 +289,7 @@ fun RoomScreen(
         val catSource = remember { MutableInteractionSource() }
 
         Image(
-            painter = painterResource(id = catImage),
+            painter = painterResource(id = catImageRes),
             contentDescription = "Kitty",
             // Use Fit so it doesn't get distorted
             contentScale = ContentScale.Fit,
@@ -374,6 +388,11 @@ fun DecorationSlot(
             // Spacer(modifier = Modifier.fillMaxSize().border(1.dp, Color.Red))
         }
     }
+    if (isFirstRun) {
+        TutorialOverlay(
+            onFinish = { onTutorialFinished() }
+        )
+    }
 }
 // In RoomScreen.kt
 
@@ -397,7 +416,10 @@ fun RoomScreenPreview() {
             onStatsClick = {},
             placedItems = mapOf(com.example.savekitty.data.DecorationType.BIG_SHELF to "big_shelf_1"),
             onEquipDemo = {},
-            onWatchAd = {}
+            onWatchAd = {},
+            catSkinId = 1,
+            isFirstRun = false,
+            onTutorialFinished = {}
 
         )
     }

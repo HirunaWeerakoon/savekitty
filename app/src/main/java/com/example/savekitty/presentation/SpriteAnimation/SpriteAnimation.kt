@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SpriteAnimation(
     frames: List<Int>,
-    frameDurationMillis: Long = 150,
+    frameDurationMillis: Long = 100,
     modifier: Modifier = Modifier
 ) {
     if (frames.isEmpty()) return

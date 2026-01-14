@@ -21,6 +21,7 @@ import com.example.savekitty.viewModel.GameViewModel
 import com.example.savekitty.presentation.StatsScreen
 import com.example.savekitty.presentation.shop.FurnitureShopScreen
 
+
 @Composable
 fun SaveKittyNavigation(viewModel: GameViewModel) {
     val navController = rememberNavController()
@@ -37,8 +38,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val isFirstRun by viewModel.isFirstRun.collectAsState()
     val deceasedCats by viewModel.deceasedCats.collectAsState()
     val history by viewModel.history.collectAsState()
-
+    val catSkinId by viewModel.catSkin.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -119,7 +121,10 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                         viewModel.equipDecoration(randomItem)
                     }
                 } ,
-                onWatchAd = { viewModel.earnAdReward() }
+                onWatchAd = { viewModel.earnAdReward() },
+                catSkinId = catSkinId,  // <--- Pass the skin
+                isFirstRun = isFirstRun, // <--- Pass the tutorial state
+                onTutorialFinished = { viewModel.completeTutorial() }
 
 
             )

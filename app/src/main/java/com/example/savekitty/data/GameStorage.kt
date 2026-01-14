@@ -36,6 +36,7 @@ class GameStorage(private val context: Context) {
         val KEY_IS_FIRST_RUN = booleanPreferencesKey("is_first_run")
         val KEY_LAST_OPEN_DATE = longPreferencesKey("last_open_date")
         val KEY_PLACED_ITEMS = stringPreferencesKey("placed_items")
+        private val TIMER_END_TIME_KEY = longPreferencesKey("timer_end_time")
     }
 
     // --- READ DATA (Flows) ---
@@ -105,6 +106,8 @@ class GameStorage(private val context: Context) {
                 gson.fromJson(json, typeToken)
             }
         }
+    val timerEndTimeFlow: Flow<Long> = context.dataStore.data
+        .map { preferences -> preferences[TIMER_END_TIME_KEY] ?: 0L }
     // SAVE DATE
     suspend fun saveInventory(inventory: Map<String, Int>) {
         val json = gson.toJson(inventory)
@@ -170,5 +173,10 @@ class GameStorage(private val context: Context) {
     suspend fun saveHistory(list: List<StudySession>) {
         val json = gson.toJson(list)
         context.dataStore.edit { it[KEY_HISTORY] = json }
+    }
+    suspend fun saveTimerEndTime(timestamp: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[TIMER_END_TIME_KEY] = timestamp
+        }
     }
 }

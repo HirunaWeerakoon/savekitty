@@ -249,5 +249,12 @@ class GameViewModel : ViewModel() {
         GameRepository.earnBiscuits(5)
         soundManager?.playChing() // Play the "money" sound
     }
+    // Add this function
+    fun completeTutorial() {
+        GameRepository.setCatIdentity(
+            GameRepository.catName.value,
+            GameRepository.catSkin.value
+        ) // This function in Repo already sets isFirstRun = false
+    }
 
 }

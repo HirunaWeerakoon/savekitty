@@ -60,6 +60,7 @@ object GameRepository {
 
     private val _placedItems = MutableStateFlow<Map<DecorationType, String>>(emptyMap())
     val placedItems = _placedItems.asStateFlow()
+    private var timerJob: kotlinx.coroutines.Job? = null
 
     fun initialize(context: Context) {
         storage = GameStorage(context)
@@ -163,6 +164,25 @@ object GameRepository {
         scope.launch {
             storage?.placedItemsFlow?.collectLatest { _placedItems.value = it }
         }
+        scope.launch {
+            // Load the target end time
+            val savedEndTime = storage?.timerEndTimeFlow?.first() ?: 0L
+            val currentTime = System.currentTimeMillis()
+
+            if (savedEndTime > currentTime) {
+                // CASE A: App opened, timer is still running in background
+                val diffSeconds = (savedEndTime - currentTime) / 1000
+                _timeLeft.value = diffSeconds.toInt()
+                _isTimerRunning.value = true
+                startTicking() // Resume the visual countdown
+            } else if (savedEndTime > 0L) {
+                // CASE B: App opened, timer finished while we were gone!
+                _timeLeft.value = 0
+                _isTimerRunning.value = false
+                storage?.saveTimerEndTime(0) // Clear it
+                // Optional: Give reward immediately here if you want
+            }
+        }
 
     }
 
@@ -201,12 +221,59 @@ object GameRepository {
         }
     }
     fun toggleTimer() {
-        _isTimerRunning.value = !_isTimerRunning.value
+        if (_isTimerRunning.value) {
+            // PAUSING THE TIMER
+            pauseTimer()
+        } else {
+            // STARTING THE TIMER
+            startTimer()
+        }
+    }
+    private fun startTimer() {
+        val durationSeconds = _timeLeft.value
+        if (durationSeconds <= 0) return
+
+        _isTimerRunning.value = true
+
+        // Calculate the "Target Time" (e.g., Now + 25 mins)
+        val endTime = System.currentTimeMillis() + (durationSeconds * 1000L)
+
+        scope.launch {
+            storage?.saveTimerEndTime(endTime)
+        }
+
+        startTicking()
+    }
+    private fun pauseTimer() {
+        _isTimerRunning.value = false
+        timerJob?.cancel()
+
+        // Clear the "Target Time" so it doesn't keep counting in background
+        scope.launch {
+            storage?.saveTimerEndTime(0)
+        }
+    }
+    private fun startTicking() {
+        timerJob?.cancel()
+        timerJob = scope.launch {
+            while (_isTimerRunning.value && _timeLeft.value > 0) {
+                kotlinx.coroutines.delay(1000)
+                _timeLeft.value -= 1
+
+                if (_timeLeft.value <= 0) {
+                    _isTimerRunning.value = false
+                    storage?.saveTimerEndTime(0)
+                    // Timer Finished! (Reward logic is handled in UI usually, or add it here)
+                }
+            }
+        }
     }
 
     fun setTimer(minutes: Int) {
         _timeLeft.value = minutes * 60
         _isTimerRunning.value = false
+        timerJob?.cancel()
+        scope.launch { storage?.saveTimerEndTime(0) } // Clear any old timer
     }
     fun tickTimer() {
         if (_isTimerRunning.value && _timeLeft.value > 0) {
