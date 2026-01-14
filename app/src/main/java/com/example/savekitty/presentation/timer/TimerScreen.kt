@@ -108,7 +108,7 @@ fun TimerScreen(
                     x = screenWidth * 0.1f, // <--- TWEAK THIS
                     y = screenHeight * (-0.05f)  // <--- TWEAK THIS
                 )
-                .size(screenWidth * 0.85f) // Size relative to width
+                .size(screenWidth * 0.9f) // Size relative to width
         )
         // --- LAYER 1: BACKGROUND (The Desk) ---
         Image(
@@ -164,8 +164,8 @@ fun TimerScreen(
             contentDescription = "Notebook",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .offset(x = screenWidth * 0.22f, y = screenHeight * 0.55f)
-                .size(screenWidth * 0.4f)
+                .offset(x = screenWidth * 0.22f, y = screenHeight * 0.53f)
+                .size(screenWidth * 0.5f)
                 .pixelClickable(imageBitmap = notebookBitmap) {
                     onPlayPageTurn()
                     showNotebook = true
