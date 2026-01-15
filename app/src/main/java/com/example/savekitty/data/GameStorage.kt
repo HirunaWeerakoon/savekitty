@@ -38,6 +38,7 @@ class GameStorage(private val context: Context) {
         val KEY_PLACED_ITEMS = stringPreferencesKey("placed_items")
         private val TIMER_END_TIME_KEY = longPreferencesKey("timer_end_time")
         private val IS_FIRST_RUN_KEY = booleanPreferencesKey("is_first_run")
+
     }
 
     // --- READ DATA (Flows) ---
@@ -186,4 +187,5 @@ class GameStorage(private val context: Context) {
             preferences[IS_FIRST_RUN_KEY] = isFirstRun
         }
     }
+
 }

@@ -58,6 +58,10 @@ class GameViewModel : ViewModel() {
 
     val catSkin = GameRepository.catSkin
     val catName = GameRepository.catName
+
+
+
+
     // In GameViewModel class
 
     // --- TIMER LOGIC ---

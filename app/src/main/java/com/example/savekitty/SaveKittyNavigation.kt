@@ -40,6 +40,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val deceasedCats by viewModel.deceasedCats.collectAsState()
     val history by viewModel.history.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val catName by viewModel.catName.collectAsState()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
