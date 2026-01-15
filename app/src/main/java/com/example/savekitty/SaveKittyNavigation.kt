@@ -38,7 +38,6 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val isFirstRun by viewModel.isFirstRun.collectAsState()
     val deceasedCats by viewModel.deceasedCats.collectAsState()
     val history by viewModel.history.collectAsState()
-    val catSkinId by viewModel.catSkin.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
@@ -84,6 +83,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         }
         // 🏠 SCREEN 1: THE ROOM
         composable("room") {
+            val catSkinId by viewModel.catSkin.collectAsState()
             RoomScreen(
                 currentHealth = health,
                 coinCount = coins,
@@ -122,9 +122,10 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                     }
                 } ,
                 onWatchAd = { viewModel.earnAdReward() },
-                catSkinId = catSkinId,  // <--- Pass the skin
-                isFirstRun = isFirstRun, // <--- Pass the tutorial state
-                onTutorialFinished = { viewModel.completeTutorial() }
+                catSkinId = catSkinId,
+                isFirstRun = isFirstRun,
+                onTutorialFinished = { viewModel.completeTutorial() },
+                isTimerRunning = isTimerRunning
 
 
             )

@@ -56,6 +56,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
+import com.example.savekitty.data.GameRepository
 import com.example.savekitty.data.GameRepository.isFirstRun
 import com.example.savekitty.data.GameRepository.isTimerRunning
 import com.example.savekitty.presentation.CatSkinManager
@@ -88,7 +89,7 @@ fun RoomScreen(
 
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
-    val isHappy = currentHealth > 4
+
     val fireFrames = listOf(
         R.drawable.prop_fireplace_0,
         R.drawable.prop_fireplace_1,
@@ -263,8 +264,8 @@ fun RoomScreen(
 
 
         // --- LAYER 3: THE KITTY 🐱 ---
+        val isHappy = catState == CatState.SLEEP
 
-        val isHappy = currentHealth > 4
         val catImage = if (isHappy) R.drawable.cat_sleep else R.drawable.cat_hungry
         val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
 
@@ -280,6 +281,8 @@ fun RoomScreen(
         val hungryHeight = screenWidth * 0.445f
         // -------------------------------------------------
 
+
+
         // Logic to pick the right size
         val currentWidth = if (isHappy) sleepWidth else hungryWidth
         val currentHeight = if (isHappy) sleepHeight else hungryHeight
@@ -293,11 +296,9 @@ fun RoomScreen(
         Image(
             painter = painterResource(id = catImageRes),
             contentDescription = "Kitty",
-            // Use Fit so it doesn't get distorted
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .offset(x = catX, y = catY)
-                // Use the dynamic variables we created above
                 .size(width = currentWidth, height = currentHeight)
                 .gameClick(interactionSource = catSource) { onCatClick(isHappy) }
         )
@@ -320,6 +321,11 @@ fun RoomScreen(
                 inventory = inventory, // Pass the Map
                 onEat = { food -> onEat(food) }, // Pass the action
                 onClose = { showFeedingPopup = false }
+            )
+        }
+        if (isFirstRun) {
+            TutorialOverlay(
+                onFinish = { onTutorialFinished() }
             )
         }
     }
@@ -390,11 +396,7 @@ fun DecorationSlot(
             // Spacer(modifier = Modifier.fillMaxSize().border(1.dp, Color.Red))
         }
     }
-    if (isFirstRun) {
-        TutorialOverlay(
-            onFinish = { onTutorialFinished() }
-        )
-    }
+
 }
 // In RoomScreen.kt
 
@@ -419,9 +421,11 @@ fun RoomScreenPreview() {
             placedItems = mapOf(com.example.savekitty.data.DecorationType.BIG_SHELF to "big_shelf_1"),
             onEquipDemo = {},
             onWatchAd = {},
-            catSkinId = 1,
-            isFirstRun = false,
-            onTutorialFinished = {}
+            isFirstRun = true,
+            onTutorialFinished = {},
+            catSkinId = 0,
+            isTimerRunning = false,
+
 
         )
     }
