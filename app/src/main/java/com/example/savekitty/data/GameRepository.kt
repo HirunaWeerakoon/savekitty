@@ -188,14 +188,12 @@ object GameRepository {
 
 
     // 2. ACTIONS
-    fun setCatIdentity(name: String, skinId: Int) {
+    fun setCatIdentity(name: String, skin: Int) {
         _catName.value = name
-        _catSkin.value = skinId
-        _isFirstRun.value = false // Tutorial/Setup done
-
+        _catSkin.value = skin
         scope.launch {
-            storage?.saveCatIdentity(name, skinId)
-            storage?.saveFirstRun(false)
+            storage?.saveCatIdentity(name, skin)
+
         }
     }
 
@@ -426,6 +424,12 @@ object GameRepository {
 
             _placedItems.value = currentPlaced
             scope.launch { storage?.savePlacedItems(currentPlaced) }
+        }
+    }
+    fun completeTutorial() {
+        _isFirstRun.value = false
+        scope.launch {
+            storage?.saveIsFirstRun(false)
         }
     }
 }

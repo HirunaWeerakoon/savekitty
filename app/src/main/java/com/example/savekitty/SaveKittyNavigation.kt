@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.savekitty.data.GameRepository.catName
 import com.example.savekitty.presentation.CatSelectionScreen
 import com.example.savekitty.presentation.HospitalDialog
 import com.example.savekitty.presentation.OutsideScreen
@@ -53,7 +54,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-    val startDest = if (isFirstRun || health == 0) "setup" else "room"
+    val startDest = if (catName.isEmpty()) "setup" else "room"
     val placedItems by viewModel.placedItems.collectAsState()
 
     // 2. The Navigation Graph

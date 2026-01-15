@@ -268,7 +268,6 @@ fun RoomScreen(
 
         val catImage = if (isHappy) R.drawable.cat_sleep else R.drawable.cat_hungry
         val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
-
         // 1. CONFIGURE SIZES SEPARATELY 📏
         // -------------------------------------------------
         // 💤 SLEEPING CAT SIZE (On the table)
@@ -288,8 +287,8 @@ fun RoomScreen(
         val currentHeight = if (isHappy) sleepHeight else hungryHeight
 
         // 2. CONFIGURE POSITIONS SEPARATELY 📍
-        val catX = if (isHappy) screenWidth * 0.715f else screenWidth * 0.30f
-        val catY = if (isHappy) screenHeight * 0.54f else screenHeight * 0.6f
+        val catX = if (catState == CatState.SLEEP) screenWidth * 0.715f else screenWidth * 0.30f
+        val catY = if (catState == CatState.SLEEP) screenHeight * 0.54f else screenHeight * 0.6f
 
         val catSource = remember { MutableInteractionSource() }
 
