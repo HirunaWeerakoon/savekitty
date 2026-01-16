@@ -52,7 +52,7 @@ class GameStorage(private val context: Context) {
     val fishFlow: Flow<Int> = context.dataStore.data
         .map { preferences -> preferences[KEY_FISH] ?: 0 }
 
-    val catNameFlow: Flow<String> = context.dataStore.data.map { it[KEY_CAT_NAME] ?: "Kitty" }
+    val catNameFlow: Flow<String> = context.dataStore.data.map { it[KEY_CAT_NAME] ?: "" }
     val catSkinFlow: Flow<Int> = context.dataStore.data.map { it[KEY_CAT_SKIN] ?: 0 }
     val deceasedCatsFlow: Flow<Set<Int>> = context.dataStore.data.map {
         it[KEY_DECEASED_CATS]?.map { idStr -> idStr.toInt() }?.toSet() ?: emptySet()

@@ -64,21 +64,13 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         startDestination = startDest
     ) {
         composable("setup") {
-            // Check if we need to show the "Hospital" dialog (Cat died)
-            if (health == 0 && !isFirstRun) {
-                HospitalDialog(
-                    onConfirm = {
-                        viewModel.handleGameOver() // Resets health to 5
-                    }
-                )
-            }
-
+            // Only show selection if name is empty.
+            // If health is 0, handleGameOver() will clear the name.
             CatSelectionScreen(
-                deceasedCats = deceasedCats,
                 onCatSelected = { name, skin ->
-                    viewModel.setCatIdentity(name, skin)
+                    viewModel.setCatIdentity(name, skin) // This ONLY saves name/skin
                     navController.navigate("room") {
-                        popUpTo("setup") { inclusive = true } // Clear history
+                        popUpTo("setup") { inclusive = true }
                     }
                 }
             )

@@ -57,7 +57,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import com.example.savekitty.data.GameRepository
-import com.example.savekitty.data.GameRepository.isFirstRun
 import com.example.savekitty.data.GameRepository.isTimerRunning
 import com.example.savekitty.presentation.CatSkinManager
 import com.example.savekitty.presentation.CatState

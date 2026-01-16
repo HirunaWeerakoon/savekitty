@@ -44,7 +44,7 @@ object GameRepository {
     private val _inventory = MutableStateFlow<Map<String, Int>>(emptyMap())
     val inventory = _inventory.asStateFlow()
 
-    private val _catName = MutableStateFlow("Kitty")
+    private val _catName = MutableStateFlow("")
     val catName = _catName.asStateFlow()
 
     private val _catSkin = MutableStateFlow(0) // 0 = Orange, 1 = Black, etc.
@@ -427,9 +427,9 @@ object GameRepository {
         }
     }
     fun completeTutorial() {
-        _isFirstRun.value = false
+        _isFirstRun.value = false // This makes the popup vanish immediately
         scope.launch {
-            storage?.saveIsFirstRun(false)
+            storage?.saveIsFirstRun(false) // This saves it to disk
         }
     }
 }
