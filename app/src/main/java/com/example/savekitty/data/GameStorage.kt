@@ -30,15 +30,31 @@ class GameStorage(private val context: Context) {
 
         val KEY_INVENTORY = stringPreferencesKey("food_inventory")
         val KEY_LAST_HEALTH_TIME = longPreferencesKey("last_health_time")
-        val KEY_CAT_NAME = stringPreferencesKey("cat_name")
-        val KEY_CAT_SKIN = intPreferencesKey("cat_skin")
-        val KEY_DECEASED_CATS = stringSetPreferencesKey("deceased_cats") // Stores IDs of dead cats
         val KEY_IS_FIRST_RUN = booleanPreferencesKey("is_first_run")
         val KEY_LAST_OPEN_DATE = longPreferencesKey("last_open_date")
         val KEY_PLACED_ITEMS = stringPreferencesKey("placed_items")
         private val TIMER_END_TIME_KEY = longPreferencesKey("timer_end_time")
         private val IS_FIRST_RUN_KEY = booleanPreferencesKey("is_first_run")
+        private val KEY_CAT_NAME = stringPreferencesKey("cat_name")
+        private val KEY_CAT_SKIN = intPreferencesKey("cat_skin")
+        private val KEY_TUTORIAL_COMPLETE = booleanPreferencesKey("tutorial_complete") // <--- NEW
+        private val KEY_DECEASED_CATS = stringPreferencesKey("deceased_cats")
 
+    }
+    val catNameFlow: Flow<String> = context.dataStore.data.map { it[KEY_CAT_NAME] ?: "" }
+
+    val isTutorialCompleteFlow: Flow<Boolean> = context.dataStore.data
+        .map { it[KEY_TUTORIAL_COMPLETE] ?: false }
+
+    suspend fun saveIsTutorialComplete(complete: Boolean) {
+        context.dataStore.edit { it[KEY_TUTORIAL_COMPLETE] = complete }
+    }
+
+    suspend fun saveCatIdentity(name: String, skin: Int) {
+        context.dataStore.edit {
+            it[KEY_CAT_NAME] = name
+            it[KEY_CAT_SKIN] = skin
+        }
     }
 
     // --- READ DATA (Flows) ---
@@ -52,7 +68,6 @@ class GameStorage(private val context: Context) {
     val fishFlow: Flow<Int> = context.dataStore.data
         .map { preferences -> preferences[KEY_FISH] ?: 0 }
 
-    val catNameFlow: Flow<String> = context.dataStore.data.map { it[KEY_CAT_NAME] ?: "" }
     val catSkinFlow: Flow<Int> = context.dataStore.data.map { it[KEY_CAT_SKIN] ?: 0 }
     val deceasedCatsFlow: Flow<Set<Int>> = context.dataStore.data.map {
         it[KEY_DECEASED_CATS]?.map { idStr -> idStr.toInt() }?.toSet() ?: emptySet()
@@ -128,12 +143,7 @@ class GameStorage(private val context: Context) {
     suspend fun saveLastHealthTime(timestamp: Long) {
         context.dataStore.edit { it[KEY_LAST_HEALTH_TIME] = timestamp }
     }
-    suspend fun saveCatIdentity(name: String, skin: Int) {
-        context.dataStore.edit {
-            it[KEY_CAT_NAME] = name
-            it[KEY_CAT_SKIN] = skin
-        }
-    }
+
 
     suspend fun saveDeceasedCats(ids: Set<Int>) {
         context.dataStore.edit {

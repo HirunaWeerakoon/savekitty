@@ -58,6 +58,8 @@ object GameRepository {
     private val _placedItems = MutableStateFlow<Map<DecorationType, String>>(emptyMap())
     val placedItems = _placedItems.asStateFlow()
     private var timerJob: kotlinx.coroutines.Job? = null
+    private val _deceasedCatSkins = MutableStateFlow<Set<Int>>(emptySet())
+    val deceasedCatSkins = _deceasedCatSkins.asStateFlow()
 
     private val _catName = MutableStateFlow("")
     val catName = _catName.asStateFlow()
@@ -65,14 +67,9 @@ object GameRepository {
     private val _isTutorialComplete = MutableStateFlow(false)
     val isTutorialComplete = _isTutorialComplete.asStateFlow()
 
-    private val _deceasedCatSkins = MutableStateFlow<Set<Int>>(emptySet())
-    val deceasedCatSkins = _deceasedCatSkins.asStateFlow()
-
     fun initialize(context: Context) {
         storage = GameStorage(context)
-
         scope.launch {
-            // Collect name
             storage?.catNameFlow?.collect { _catName.value = it }
         }
         scope.launch {
@@ -420,13 +417,18 @@ object GameRepository {
         scope.launch { storage?.saveIsTutorialComplete(true) }
     }
     fun handleGameOver() {
+        val deadName = _catName.value
         val deadSkin = _catSkin.value
-        // 1. Clear current cat
-        _catName.value = ""
-        // 2. Add to hospital (deceased list)
+
         scope.launch {
-            storage?.addDeceasedCat(DeceasedCat(_catName.value, deadSkin, System.currentTimeMillis()))
-            storage?.saveCatIdentity("", 0) // Clear from disk
+            // Add current cat to deceased list
+            val currentList = storage?.deceasedCatsFlow?.first() ?: emptyList()
+            val newList = currentList + DeceasedCat(deadName, deadSkin, System.currentTimeMillis())
+            storage?.saveDeceasedCats(newList)
+
+            // CLEAR THE CURRENT CAT - This triggers the navigation back to Setup
+            _catName.value = ""
+            storage?.saveCatIdentity("", 0)
         }
     }
 }
