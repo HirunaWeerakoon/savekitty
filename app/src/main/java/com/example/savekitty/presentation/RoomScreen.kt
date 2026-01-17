@@ -83,7 +83,9 @@ fun RoomScreen(
     catSkinId: Int,
     isFirstRun: Boolean,
     onTutorialFinished: () -> Unit,
-    isTimerRunning: Boolean
+    isTimerRunning: Boolean,
+    showTutorial: Boolean,
+
 
 
 ) {
@@ -321,10 +323,8 @@ fun RoomScreen(
                 onClose = { showFeedingPopup = false }
             )
         }
-        if (isFirstRun) {
-            TutorialOverlay(
-                onFinish = { onTutorialFinished() }
-            )
+        if (showTutorial) {
+            TutorialOverlay(onFinish = onTutorialFinished)
         }
     }
 

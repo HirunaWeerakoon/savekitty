@@ -44,9 +44,6 @@ object GameRepository {
     private val _inventory = MutableStateFlow<Map<String, Int>>(emptyMap())
     val inventory = _inventory.asStateFlow()
 
-    private val _catName = MutableStateFlow("")
-    val catName = _catName.asStateFlow()
-
     private val _catSkin = MutableStateFlow(0) // 0 = Orange, 1 = Black, etc.
     val catSkin = _catSkin.asStateFlow()
 
@@ -62,10 +59,32 @@ object GameRepository {
     val placedItems = _placedItems.asStateFlow()
     private var timerJob: kotlinx.coroutines.Job? = null
 
+    private val _catName = MutableStateFlow("")
+    val catName = _catName.asStateFlow()
+
+    private val _isTutorialComplete = MutableStateFlow(false)
+    val isTutorialComplete = _isTutorialComplete.asStateFlow()
+
+    private val _deceasedCatSkins = MutableStateFlow<Set<Int>>(emptySet())
+    val deceasedCatSkins = _deceasedCatSkins.asStateFlow()
+
     fun initialize(context: Context) {
         storage = GameStorage(context)
 
-        // Sync: When Disk changes -> Update Memory
+        scope.launch {
+            // Collect name
+            storage?.catNameFlow?.collect { _catName.value = it }
+        }
+        scope.launch {
+            // Collect tutorial status
+            storage?.isTutorialCompleteFlow?.collect { _isTutorialComplete.value = it }
+        }
+        scope.launch {
+            // Collect deceased skins (Hospitalized)
+            storage?.deceasedCatsFlow?.collect { list ->
+                _deceasedCatSkins.value = list.map { it.skinId }.toSet()
+            }
+        }
         scope.launch {
             storage?.biscuitsFlow?.collectLatest { _biscuits.value = it }
         }
@@ -85,13 +104,7 @@ object GameRepository {
             storage?.historyFlow?.collectLatest { _history.value = it }
         }
         scope.launch {
-            storage?.catNameFlow?.collectLatest { _catName.value = it }
-        }
-        scope.launch {
             storage?.catSkinFlow?.collectLatest { _catSkin.value = it }
-        }
-        scope.launch {
-            storage?.deceasedCatsFlow?.collectLatest { _deceasedCats.value = it }
         }
         scope.launch {
             storage?.isFirstRunFlow?.collectLatest { _isFirstRun.value = it }
@@ -191,32 +204,8 @@ object GameRepository {
     fun setCatIdentity(name: String, skin: Int) {
         _catName.value = name
         _catSkin.value = skin
-        scope.launch {
-            storage?.saveCatIdentity(name, skin)
-
-        }
-    }
-
-    fun handleGameOver() {
-        // 1. Mark current cat as deceased
-        val currentSkin = _catSkin.value
-        val newDeceasedSet = _deceasedCats.value + currentSkin
-
-        _deceasedCats.value = newDeceasedSet
-        scope.launch { storage?.saveDeceasedCats(newDeceasedSet) }
-
-        // 2. Reset Game State (Punishment)
-        _health.value = 5
-        _biscuits.value = 0 // Lost all money
-        _fishCount.value = 0
-        _inventory.value = emptyMap() // Lost items
-
-        scope.launch {
-            storage?.saveHealth(5)
-            storage?.saveBiscuits(0)
-            storage?.saveFish(0)
-            storage?.saveInventory(emptyMap())
-        }
+        _health.value = 10 // New cat starts fresh
+        scope.launch { storage?.saveCatIdentity(name, skin) }
     }
     fun toggleTimer() {
         if (_isTimerRunning.value) {
@@ -427,9 +416,17 @@ object GameRepository {
         }
     }
     fun completeTutorial() {
-        _isFirstRun.value = false // This makes the popup vanish immediately
+        _isTutorialComplete.value = true
+        scope.launch { storage?.saveIsTutorialComplete(true) }
+    }
+    fun handleGameOver() {
+        val deadSkin = _catSkin.value
+        // 1. Clear current cat
+        _catName.value = ""
+        // 2. Add to hospital (deceased list)
         scope.launch {
-            storage?.saveIsFirstRun(false) // This saves it to disk
+            storage?.addDeceasedCat(DeceasedCat(_catName.value, deadSkin, System.currentTimeMillis()))
+            storage?.saveCatIdentity("", 0) // Clear from disk
         }
     }
 }

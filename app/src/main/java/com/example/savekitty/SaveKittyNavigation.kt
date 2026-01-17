@@ -2,6 +2,7 @@ package com.example.savekitty
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
@@ -28,7 +29,7 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val navController = rememberNavController()
 
     // 1. Collect State from ViewModel (One place to rule them all)
-    val health by viewModel.health.collectAsState()
+
     val coins by viewModel.biscuits.collectAsState()
     val fish by viewModel.fishCount.collectAsState()
     val timeLeft by viewModel.timeLeft.collectAsState()
@@ -41,6 +42,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
     val history by viewModel.history.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val catName by viewModel.catName.collectAsState()
+    val catSkinId by viewModel.catSkin.collectAsState()
+    val health by viewModel.health.collectAsState()
+    val deceasedSkins by viewModel.deceasedCatSkins.collectAsState()
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -64,31 +68,31 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
         startDestination = startDest
     ) {
         composable("setup") {
-            // 1. Collect the list from the ViewModel
-            val deceasedCats by viewModel.deceasedCats.collectAsState()
-            val health by viewModel.health.collectAsState()
-            val isFirstRun by viewModel.isFirstRun.collectAsState()
-
-            // Keep your hospital logic if needed
-            if (health == 0 && !isFirstRun) {
-                HospitalDialog(
-                    onConfirm = { viewModel.handleGameOver() }
-                )
+            // If we are here and there are deceased cats, show the Hospital Popup
+            if (deceasedSkins.isNotEmpty()) {
+                HospitalDialog(onConfirm = { /* Just dismisses */ })
             }
 
             CatSelectionScreen(
-                deceasedCats = deceasedCats, // <--- ADD THIS LINE
+                disabledSkins = deceasedSkins, // Pass set of skins to grey out
                 onCatSelected = { name, skin ->
                     viewModel.setCatIdentity(name, skin)
-                    navController.navigate("room") {
-                        popUpTo("setup") { inclusive = true }
-                    }
+                    navController.navigate("room") { popUpTo("setup") { inclusive = true } }
                 }
             )
         }
+
+
         // 🏠 SCREEN 1: THE ROOM
         composable("room") {
-            val catSkinId by viewModel.catSkin.collectAsState()
+
+            val isTutorialComplete by viewModel.isTutorialComplete.collectAsState()
+            if (health <= 0) {
+                LaunchedEffect(Unit) {
+                    viewModel.handleGameOver()
+                    navController.navigate("setup") { popUpTo("room") { inclusive = true } }
+                }
+            }
             RoomScreen(
                 currentHealth = health,
                 coinCount = coins,
@@ -130,7 +134,9 @@ fun SaveKittyNavigation(viewModel: GameViewModel) {
                 catSkinId = catSkinId,
                 isFirstRun = isFirstRun,
                 onTutorialFinished = { viewModel.completeTutorial() },
-                isTimerRunning = isTimerRunning
+                isTimerRunning = isTimerRunning,
+                showTutorial = !isTutorialComplete,
+                onTutorialFinished = { viewModel.completeTutorial() }
 
 
             )
