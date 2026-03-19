@@ -1,7 +1,7 @@
 package com.example.savekitty.viewModel
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class GameViewModel : ViewModel() {
+class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- REPOSITORY STATE ---
     val health = GameRepository.health
@@ -31,109 +31,52 @@ class GameViewModel : ViewModel() {
     val todoList = GameRepository.todoList
     val history = GameRepository.history
     val inventory = GameRepository.inventory
+    val isTutorialComplete = GameRepository.isTutorialComplete
+    val catSkin = GameRepository.catSkin
+    val catName = GameRepository.catName
+    val deceasedCats = GameRepository.deceasedCats
+    val placedItems = GameRepository.placedItems
+    val timeLeft: StateFlow<Int> = GameRepository.timeLeft
+    val isTimerRunning: StateFlow<Boolean> = GameRepository.isTimerRunning
 
-    // --- LOCAL VIEWMODEL STATE ---
-    private var appContext: Context? = null
-    private var soundManager: SoundManager? = null
-    private var notificationHelper: NotificationHelper? = null
+    // --- VIEWMODEL STATE ---
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val _showHospitalDialog = MutableStateFlow(false)
+    val showHospitalDialog = _showHospitalDialog.asStateFlow()
 
     private val _isMuted = MutableStateFlow(false)
     val isMutedState = _isMuted.asStateFlow()
 
-    // TIMER STATE
-    private val _timeLeft = MutableStateFlow(25 * 60) // Default 25 min (1500 seconds)
-    val timeLeft: StateFlow<Int> = _timeLeft.asStateFlow()
+    private var soundManager: SoundManager? = null
+    private var notificationHelper: NotificationHelper? = null
 
-    private val _isTimerRunning = MutableStateFlow(false)
-    val isTimerRunning: StateFlow<Boolean> = _isTimerRunning.asStateFlow()
-
-    // Memory for resetting (Defaults to 25m)
-    private var lastSelectedTime = 25 * 60
-
-    private var timerJob: Job? = null
-
-    val isFirstRun = GameRepository.isFirstRun
-    val deceasedCats = GameRepository.deceasedCats
-    val placedItems = GameRepository.placedItems
-
-    val catSkin = GameRepository.catSkin
-    val catName = GameRepository.catName
-
-
-
-
-
-    // In GameViewModel class
-
-    // --- TIMER LOGIC ---
-
-    fun setTime(seconds: Int) {
-        // Critical Fix: Only update if timer is stopped
-        if (!_isTimerRunning.value) {
-            _timeLeft.value = seconds
-            lastSelectedTime = seconds // Remember: 1500 or 3000
-        }
-    }
-
-    fun toggleTimer() {
-        if (_isTimerRunning.value) {
-            stopTimer()
-        } else {
-            startTimer()
-        }
-    }
-
-    private fun startTimer() {
-        if (timerJob?.isActive == true) return
-
-        _isTimerRunning.value = true
-
-        timerJob = viewModelScope.launch {
-            // Count down while time remains
-            while (_timeLeft.value > 0 && _isTimerRunning.value) {
-                delay(1000L)
-                _timeLeft.value -= 1
+    init {
+        viewModelScope.launch {
+            GameRepository.initialize(application.applicationContext)
+            _isLoading.value = false // Signal that loading is complete
+            
+            launch {
+                GameRepository.timerFinishedEvent.collect { minutes ->
+                    onTimerFinished(minutes)
+                }
             }
-
-            // CHECK: Did we finish naturally? (Time hit 0)
-            if (_timeLeft.value == 0) {
-                onTimerFinished() // Trigger Rewards
-            }
-
-            // Ensure clean stop state
-            stopTimer()
         }
     }
 
-    private fun stopTimer() {
-        timerJob?.cancel()
-        _isTimerRunning.value = false
-        // RESET LOGIC: Snap back to the last selected time (e.g. 50:00)
-        _timeLeft.value = lastSelectedTime
+    fun onHospitalDialogDismissed() {
+        _showHospitalDialog.value = false
     }
 
-    private fun onTimerFinished() {
-        // ALL REWARD LOGIC LIVES HERE NOW
+    fun setTime(seconds: Int) = GameRepository.setTimer(seconds / 60)
+    fun toggleTimer() = GameRepository.toggleTimer()
+
+    private fun onTimerFinished(minutesFocus: Int) {
         soundManager?.playLevelUp()
         notificationHelper?.showTimerComplete()
-
-        // Calculate minutes worked based on what the timer started at
-        val minutesFocus = lastSelectedTime / 60
         GameRepository.recordSession(minutesFocus)
-
-        // Reward: 10 biscuits for 25m, maybe 20 for 50m?
-        // For now, let's keep it simple:
         completeStudySession()
-    }
-
-    // --- SOUND & GAME ACTIONS ---
-
-    fun setContext(context: Context) {
-        this.appContext = context.applicationContext
-    }
-
-    fun completeStudySession() {
-        GameRepository.earnBiscuits(10)
     }
 
     fun setSoundManager(manager: SoundManager) {
@@ -155,49 +98,12 @@ class GameViewModel : ViewModel() {
         this.notificationHelper = helper
     }
 
-    fun buyFish() {
-        if (GameRepository.biscuits.value >= 5) {
-            GameRepository.buyFish()
-            soundManager?.playChing()
-        }
-    }
-
-    fun consumeFish() = GameRepository.eatFish()
-
     fun onCatClick(isSleeping: Boolean) {
         GameRepository.earnBiscuits(1)
         if (isSleeping) {
-            // SLEEPING: Purr + Vibrate
             soundManager?.playPurr()
-            vibratePhone(3000)
         } else {
-            // HUNGRY: Meow only
             soundManager?.playMeow()
-        }
-    }
-    private fun vibratePhone(durationMs: Long) {
-        val vibrator = appContext?.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
-        if (android.os.Build.VERSION.SDK_INT >= 26) {
-            // Use the duration here
-            vibrator?.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            // Use the duration here
-            vibrator?.vibrate(durationMs)
-        }
-    }
-
-    fun startMeowTest() {
-        viewModelScope.launch {
-            delay(10000)
-            notificationHelper?.showMeowNotification()
-            soundManager?.playMeow()
-        }
-    }
-
-    fun onAppBackgrounded() {
-        viewModelScope.launch {
-            soundManager?.pauseMusic()
-            scheduleNotification()
         }
     }
 
@@ -209,29 +115,32 @@ class GameViewModel : ViewModel() {
         soundManager?.resumeMusic()
         cancelNotification()
     }
+
+    fun onAppBackgrounded() {
+        soundManager?.pauseMusic()
+        scheduleNotification()
+    }
+
     fun setCatIdentity(name: String, skin: Int) {
         GameRepository.setCatIdentity(name, skin)
     }
 
     fun handleGameOver() {
         GameRepository.handleGameOver()
+        _showHospitalDialog.value = true
     }
-
-    // --- TODO & DATA ---
 
     fun addTodo(text: String, isDaily: Boolean) = GameRepository.addTodo(text, isDaily)
     fun toggleTodo(id: Long) = GameRepository.toggleTodo(id)
     fun deleteTodo(id: Long) = GameRepository.deleteTodo(id)
     fun buyFood(food: Food) = GameRepository.buyFood(food)
     fun eatFood(food: Food) {
-        // ... existing logic ...
         GameRepository.eatFood(food)
         soundManager?.playEat()
     }
-    // --- WORKER / NOTIFICATIONS ---
 
     private fun scheduleNotification() {
-        val context = appContext ?: return
+        val context = getApplication<Application>().applicationContext
         val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
             .setInitialDelay(24, TimeUnit.HOURS)
             .addTag("meow_reminder")
@@ -245,24 +154,31 @@ class GameViewModel : ViewModel() {
     }
 
     private fun cancelNotification() {
-        val context = appContext ?: return
+        val context = getApplication<Application>().applicationContext
         WorkManager.getInstance(context).cancelAllWorkByTag("meow_reminder")
     }
+
     fun buyDecoration(item: Decoration) = GameRepository.buyDecoration(item)
     fun equipDecoration(item: Decoration) = GameRepository.equipDecoration(item)
-
     fun earnAdReward() {
-        // In a real app, you'd trigger the Ad SDK here.
-        // For now, we give the reward immediately.
         GameRepository.earnBiscuits(5)
-        soundManager?.playChing() // Play the "money" sound
-    }
-    // Add this function
-    fun completeTutorial() {
-        GameRepository.setCatIdentity(
-            GameRepository.catName.value,
-            GameRepository.catSkin.value
-        ) // This function in Repo already sets isFirstRun = false
+        soundManager?.playChing()
     }
 
+    fun completeTutorial() {
+        GameRepository.completeTutorial()
+    }
+
+    fun completeStudySession() {
+        GameRepository.earnBiscuits(10)
+    }
+
+    fun buyFish() {
+        if (GameRepository.biscuits.value >= 5) {
+            GameRepository.buyFish()
+            soundManager?.playChing()
+        }
+    }
+
+    fun consumeFish() = GameRepository.eatFish()
 }

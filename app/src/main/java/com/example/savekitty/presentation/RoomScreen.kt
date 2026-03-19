@@ -57,7 +57,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import com.example.savekitty.data.GameRepository
-import com.example.savekitty.data.GameRepository.isTimerRunning
 import com.example.savekitty.presentation.CatSkinManager
 import com.example.savekitty.presentation.CatState
 import com.example.savekitty.presentation.TutorialOverlay
@@ -67,9 +66,6 @@ fun RoomScreen(
     currentHealth: Int = 10,
     coinCount: Int = 100,
     onTableClick: () -> Unit,
-    fishCount: Int,
-    onBuyFish: () -> Unit,
-    onFeedCat: () -> Unit,
     onDoorClick: () -> Unit,
     onCatClick: (Boolean) -> Unit,
     isMuted: Boolean,
@@ -81,13 +77,9 @@ fun RoomScreen(
     onEquipDemo: (DecorationType) -> Unit,
     onWatchAd: () -> Unit,
     catSkinId: Int,
-    isFirstRun: Boolean,
-    onTutorialFinished: () -> Unit,
     isTimerRunning: Boolean,
     showTutorial: Boolean,
-
-
-
+    onTutorialFinished: () -> Unit
 ) {
     var showFeedingPopup by remember { mutableStateOf(false) }
 
@@ -105,7 +97,7 @@ fun RoomScreen(
         isTimerRunning -> CatState.SIT
         else -> CatState.SLEEP
     }
-    val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
+
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -267,7 +259,7 @@ fun RoomScreen(
         // --- LAYER 3: THE KITTY 🐱 ---
         val isHappy = catState == CatState.SLEEP
 
-        val catImage = if (isHappy) R.drawable.cat_sleep else R.drawable.cat_hungry
+
         val catImageRes = CatSkinManager.getCatImage(catSkinId, catState)
         // 1. CONFIGURE SIZES SEPARATELY 📏
         // -------------------------------------------------
@@ -408,9 +400,6 @@ fun RoomScreenPreview() {
             onDoorClick = {},
             onCatClick = {},
             coinCount = 100,
-            fishCount = 0,
-            onBuyFish = {},
-            onFeedCat = {},
             isMuted = false,
             onToggleMute = {},
             inventory = emptyMap(),
@@ -419,11 +408,10 @@ fun RoomScreenPreview() {
             placedItems = mapOf(com.example.savekitty.data.DecorationType.BIG_SHELF to "big_shelf_1"),
             onEquipDemo = {},
             onWatchAd = {},
-            isFirstRun = true,
-            onTutorialFinished = {},
             catSkinId = 0,
             isTimerRunning = false,
-
+            showTutorial = false,
+            onTutorialFinished = {}
 
         )
     }
